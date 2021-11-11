@@ -42,10 +42,22 @@ git clone https://github.com/tweedegolf/workshop-december-2021.git
 cd embedded-workshop
 ```
 
-Then, we'll install some tools needed to flash the mcu and inspect the code:
+Then, we'll install some tools needed to flash the mcu and inspect the code.
+
+On Linux you need to install libudev and libusb. If you're on Ubuntu:
 ```bash
+# ubuntu
 sudo apt install -y libusb-1.0-0-dev libftdi1-dev
-cargo install --force flip-link cargo-binutils cargo-flash cargo-embed probe-run
+```
+
+On all platforms:
+```bash
+cargo install flip-link --version 0.1.5
+cargo install cargo-binutils --version 0.3.3
+cargo install cargo-flash --version 0.11.0
+cargo install cargo-embed --version 0.11.0
+cargo install probe-run --version 0.3.0
+rustup component add llvm-tools-preview
 ```
 
 If you're on linux, you'll need to update your udev rules.
@@ -94,7 +106,7 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 
 To test the hardware, please connect the nrf board to your pc, switch it on, and run
 ```bash
-cargo run --release -p examples --bin test
+DEFMT_LOG=info cargo run --release -p examples --bin test
 ```
 
 If everything works correctly, you should now see the accelerometer samples being printed on the display. If not, don't worry and contact us.
