@@ -1,10 +1,28 @@
 # Summary
 
-[Introduction]()
+[Introduction](preface/introduction.md)
 
-[Course overview]()
+[Course overview](preface/curriculum.md)
 
-[Setting up](./preface/setup.md)
+[Setting up](preface/setup.md)
 
- - [Overview and drivers]()
- - [Rust in IoT]()
+ - [Part 1: Overview and drivers](part_1/introduction.md)
+   - [Exploring the ecosystem](part_1/rust_embedded_ecosystem/introduction.md)
+     - [Cortex-m crates](part_1/rust_embedded_ecosystem/cortex-m_crates.md)
+     - [Device PACs](part_1/rust_embedded_ecosystem/device_pacs.md)
+     - [Device HALs](part_1/rust_embedded_ecosystem/device_hals.md)
+     - [Embedded-hal](part_1/rust_embedded_ecosystem/embedded-hal.md)
+     - [Typestate](part_1/rust_embedded_ecosystem/typestate.md)
+     - [Runtimes](part_1/rust_embedded_ecosystem/runtimes.md)
+   - [Exercise: LIS3DH ID](part_1/exercise_lis3dh_id/exercise.md)
+     - [Solution](part_1/exercise_lis3dh_id/solution.md)
+   - [Platform-agnostic drivers](part_1/platform-agnostic_device_drivers/introduction.md)
+     - [Abstraction in C](part_1/platform-agnostic_device_drivers/abstraction_in_c.md)
+     - [Abstraction in Rust](part_1/platform-agnostic_device_drivers/abstraction_in_rust.md)
+     - [Low level & high level drivers](part_1/platform-agnostic_device_drivers/LL&HL_drivers.md)
+     - [A low level driver in C](part_1/platform-agnostic_device_drivers/LL_driver_in_c.md)
+     - [A low level driver in Rust](part_1/platform-agnostic_device_drivers/LL_driver_in_rust.md)
+     - [A fancy typesafe low level driver in Rust](part_1/platform-agnostic_device_drivers/fancy_LL_driver_in_rust.md)
+   - [Exercise: Create a driver for the LIS3DH](part_1/exercise_lis3dh_driver/exercise.md)
+     - [Solution](part_1/exercise_lis3dh_driver/solution.md)
+ - [Part 2: Rust in IoT]()
