@@ -2,15 +2,15 @@
 //! and works as it should.
 #![no_std]
 #![no_main]
+use core::{fmt::Write, panic};
+use cortex_m_rt::entry;
 use hal::{
     pac,
     uarte::{Baudrate, Parity, Pins},
 };
-use nrf52840_hal as hal;
 use lis3dh::accelerometer::Accelerometer;
-use cortex_m_rt::entry;
-use core::fmt::Write;
-use examples as _;
+use nrf52840_hal as hal;
+use workshop_examples as _;
 
 #[entry]
 fn start() -> ! {
@@ -46,9 +46,9 @@ fn start() -> ! {
         Baudrate::BAUD115200,
     );
 
-    defmt::info!("Printing message to virtual COM port...");
-    write!(&mut uart, "Hello from Rust on the nrf52840!\r\n").unwrap();
-    defmt::info!("Done! Please check if you received it");
+    defmt::println!("Printing message to virtual COM port...");
+    write!(&mut uart, "Hello from Rust on the nRF52840!\r\n").unwrap();
+    defmt::println!("Done! Please check if you received it");
 
     // Set up lis3dh driver over I2C
     let twim0_scl = port0.p0_27.into_floating_input().degrade();
@@ -62,18 +62,20 @@ fn start() -> ! {
         hal::twim::Frequency::K400,
     );
 
-    defmt::info!(
+    defmt::println!(
         "Now going to initialize the LIS3DH driver. Please check connection if this goes wrong"
     );
 
+    panic!("HERRLO");
+
     let mut lis3dh = lis3dh::Lis3dh::new_i2c(i2c, lis3dh::SlaveAddr::Default).unwrap();
 
-    defmt::info!(
+    defmt::println!(
         "Found Lis3dh. Device id: {}",
         lis3dh.get_device_id().unwrap()
     );
 
-    defmt::info!("Printing acc measurements to virtual COM port. Please check that this works. Press CTRL+C to quit");
+    defmt::println!("Printing acc measurements to virtual COM port. Please check that this works. Press CTRL+C to quit");
     loop {
         let sample = lis3dh.accel_norm().unwrap();
         write!(

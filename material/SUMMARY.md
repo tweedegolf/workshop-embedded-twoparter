@@ -1,8 +1,8 @@
 # Summary
 
-[Introduction]()
+[Introduction](./preface/introduction.md)
 
-[Course overview]()
+[Course overview](./preface/curriculum.md)
 
 [Setting up](./preface/setup.md)
 

@@ -1,7 +1,7 @@
 [workspace]
-
 members = [
     "material",
+    "material/testsuite",
     # "assignments"
 ]
 

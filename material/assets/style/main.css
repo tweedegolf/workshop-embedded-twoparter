@@ -1,0 +1,24 @@
+.content main {
+    --content-max-width: 80%;
+    font-size: 3rem;
+}
+
+.content img {
+    display: block;
+    margin: 0 auto;
+}
+
+.content img.img-right {
+    position: absolute;
+    right: 5%;
+}
+
+.content img.img-overlay {
+    z-index: 99;
+}
+
+.content main .read {
+    max-width: 750px;
+    margin: 0 auto;
+    font-size: 1.5rem;
+}

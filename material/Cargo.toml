@@ -1,5 +1,5 @@
 [package]
-name = "examples"
+name = "workshop-examples"
 version = "0.1.0"
 authors = ["Henk Oordt <hd@tweedegolf.com>", "Dion Dokter <dion@tweedegolf.com>"]
 edition = "2018"

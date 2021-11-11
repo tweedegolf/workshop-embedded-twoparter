@@ -27,7 +27,7 @@ rustup update
 
 Install the `thumbv7em-none-eabi` toolchain with the following command:
 ```bash
-rustup target add thumbv7em-none-eabi
+rustup target add thumbv7em-none-eabihf
 ```
 
 For the rest of the steps, you'll need the [source code of this workshop](https://github.com/tweedegolf/workshop-december-2021/).
@@ -73,11 +73,19 @@ If you're on windows, we need to install a generic WinUSB driver. You can use [Z
 
 Then, switch the nRF52840DK off and on or remove the cable and plug it in again.
 
-For debugging, you can use GDB. On ubuntu, it can be installed with
+
+For debugging, we will be using GDB and OpenOCD. On ubuntu, it can be installed with
 ```bash
 sudo apt update
-sudo apt install gdb-multiarch
+sudo apt install gdb-multiarch openocd
 ```
+# TODO installing openocd 0.11 w/ xpack
+https://xpack.github.io/install/
+https://xpack.github.io/openocd/
+
+### Other tools
+Of course, you're free to use your editor of choice. We will be using Visual Studio Code. To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer).
+
 
 ## Testing
 Before we begin, we need to test our hardware. We'll be testing the LIS3DH accelerometer, as well as the nRF52840DK board. Make sure you have checked out the latest version of the workshop source.
@@ -106,7 +114,7 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 
 To test the hardware, please connect the nrf board to your pc, switch it on, and run
 ```bash
-DEFMT_LOG=info cargo run --release -p examples --bin test
+DEFMT_LOG=info cargo run --release -p workshop-examples --bin test
 ```
 
 If everything works correctly, you should now see the accelerometer samples being printed on the display. If not, don't worry and contact us.
