@@ -1,13 +1,30 @@
 # Summary
 
-[Introduction](./preface/introduction.md)
+[Introduction](preface/introduction.md)
 
-[Course overview](./preface/curriculum.md)
+[Course overview](preface/curriculum.md)
 
-[Setting up](./preface/setup.md)
-
- - [Overview and drivers]()
- - [Rust in IoT](./part_2/introduction.md)
+[Setting up](preface/setup.md)
+ - [Part 1: Overview and drivers]()
+   - [Exploring the ecosystem]()
+     - [Cortex-m crates]()
+     - [Device PACs]()
+     - [Device HALs]()
+     - [Embedded-hal]()
+     - [Typestate]()
+     - [Runtimes]()
+   - [Exercise: LIS3DH ID]()
+     - [Solution]()
+   - [Platform-agnostic drivers]()
+     - [Abstraction in C]()
+     - [Abstraction in Rust]()
+     - [Low level & high level drivers]()
+     - [A low level driver in C]()
+     - [A low level driver in Rust]()
+     - [A fancy typesafe low level driver in Rust]()
+   - [Exercise: Create a driver for the LIS3DH]()
+     - [Solution]()
+ - [Part 2: Rust in IoT]()
     - [Overview](./part_2/overview.md)
     - [Rust and Cargo](./part_2/cargo/1.md)
     - [Development environment](./part_2/dev_env/1.md)
@@ -15,4 +32,5 @@
     - [RTIC](./part_2/rtic/1.md)
     - [Server-sided Rust](./part_2/server/1.md)
     - [Common data format](./part_2/common_format/1.md)
-    - [Assigment](./part_2/assignment.md)
+    - [Exercise: Communicate between firmware and server](./part_2/assignment.md)
+
