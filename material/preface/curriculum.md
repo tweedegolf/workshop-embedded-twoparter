@@ -16,25 +16,19 @@
 Basically, this workshops enables you to start working on production-like pure Rust IoT projects.
 
 
+## Goals
+- Get to know commonly used tools for building, debugging and running
+- Sharing code between firmware and host application
+- Writing task-based applications using RTIC
 
-### Covered topics
+## Covered topics
+- Making the most of Cargo
+- A Rust development environment for IoT
+- Knurling-rs: tools for ergonomic firmware development
+- Introduction to RTIC
+- Sharing code between applications
 
-- RTIC
-- Rust tooling
-  - Cargo projects
-  - Knurling-rs
-    - Testing
-    - Debugging tools
-- Sharing code between firmware and server
-  - Making the type system work for you
-  - Serde with postcard
-- The not-so-nice parts
- - Crate stability
- - Availability of SDK's
- - Compile duration
-
-
-### Assignment
-Case: nrf52840 communicating sensor measurements to a Rust service on a host.
+## Assignment
+Case: nrf52840 communicating sensor measurements and other events to a Rust service on a host.
 
 </div>
