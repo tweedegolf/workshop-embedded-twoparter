@@ -33,19 +33,11 @@
 *Getting a feel of working with Rust is like in a larger project.*
 
 ### Learning outcomes
-- Commonly used tools for setting up, building, debugging, testing and running Rust firmware
-- Sharing code between firmware and a server application
-- Create task-based firmwre using RTIC
-
-
-Basically, this workshops enables you to start working on production-like pure Rust IoT projects.
-
-
-## Goals
 - Get to know commonly used tools for building, debugging and running
-- Sharing code between firmware and host application
+- Sharing code between firmware and host application and writing a common communication format.
 - Writing task-based applications using RTIC
 
+Basically, this workshops enables you to start working on production-like pure Rust IoT projects.
 ## Covered topics
 - Making the most of Cargo
 - A Rust development environment for IoT
