@@ -27,7 +27,7 @@ rustup update
 
 Install the `thumbv7em-none-eabi` toolchain with the following command:
 ```bash
-rustup target add thumbv7em-none-eabi
+rustup target add thumbv7em-none-eabihf
 ```
 
 For the rest of the steps, you'll need the [source code of this workshop](https://github.com/tweedegolf/workshop-december-2021/).
@@ -42,10 +42,22 @@ git clone https://github.com/tweedegolf/workshop-december-2021.git
 cd embedded-workshop
 ```
 
-Then, we'll install some tools needed to flash the mcu and inspect the code:
+Then, we'll install some tools needed to flash the mcu and inspect the code.
+
+On Linux you need to install libudev and libusb. If you're on Ubuntu:
 ```bash
+# ubuntu
 sudo apt install -y libusb-1.0-0-dev libftdi1-dev
-cargo install --force flip-link cargo-binutils cargo-flash cargo-embed probe-run
+```
+
+On all platforms:
+```bash
+cargo install flip-link --version 0.1.5
+cargo install cargo-binutils --version 0.3.3
+cargo install cargo-flash --version 0.11.0
+cargo install cargo-embed --version 0.11.0
+cargo install probe-run --version 0.3.0
+rustup component add llvm-tools-preview rustfmt clippy
 ```
 
 If you're on linux, you'll need to update your udev rules.
@@ -61,11 +73,41 @@ If you're on windows, we need to install a generic WinUSB driver. You can use [Z
 
 Then, switch the nRF52840DK off and on or remove the cable and plug it in again.
 
-For debugging, you can use GDB. On ubuntu, it can be installed with
+
+For debugging, we will be using GDB and OpenOCD. On Ubuntu, GDB can be installed with:
 ```bash
 sudo apt update
 sudo apt install gdb-multiarch
 ```
+
+On Windows: *TODO*
+
+In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**. You can download it using xPack package manager or `xpm`. To install `xpm`, please follow the instructions [on this page](https://xpack.github.io/xpm/install/#). Once xpm is working correctly, you can install OpenOCD with:
+
+```bash
+xpm install --global @xpack-dev-tools/openocd@latest --verbose
+```
+That command will output the location OpenOCD is installed in. You might need to update your PATH variable to make everything a bit more ergonomic.
+For more details, take a look at the [install page](https://xpack.github.io/openocd/install/).
+
+To check that you've got the correct version:
+```bash
+openocd --version
+```
+
+The output should be something like this:
+```bash
+xPack OpenOCD x86_64 Open On-Chip Debugger 0.11.0+dev (2021-10-16-21:15)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+```
+
+**Please verify that you've got version 0.11**
+
+### Other tools
+Of course, you're free to use your editor of choice. We will be using Visual Studio Code. To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer).
+
 
 ## Testing
 Before we begin, we need to test our hardware. We'll be testing the LIS3DH accelerometer, as well as the nRF52840DK board. Make sure you have checked out the latest version of the workshop source.
@@ -94,7 +136,7 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 
 To test the hardware, please connect the nrf board to your pc, switch it on, and run
 ```bash
-cargo run --release -p examples --bin test
+DEFMT_LOG=info cargo run --release -p workshop-examples --bin test
 ```
 
 If everything works correctly, you should now see the accelerometer samples being printed on the display. If not, don't worry and contact us.

@@ -4,3 +4,6 @@ language = "en"
 multilingual = false
 src = "material"
 title = "Workshop embedded Rust December 2021"
+
+[output.html]
+additional-css = ["material/assets/style/main.css"]
