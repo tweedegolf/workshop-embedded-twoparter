@@ -57,7 +57,7 @@ cargo install cargo-binutils --version 0.3.3
 cargo install cargo-flash --version 0.11.0
 cargo install cargo-embed --version 0.11.0
 cargo install probe-run --version 0.3.0
-rustup component add llvm-tools-preview
+rustup component add llvm-tools-preview rustfmt clippy
 ```
 
 If you're on linux, you'll need to update your udev rules.
