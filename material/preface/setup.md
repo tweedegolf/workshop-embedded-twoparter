@@ -96,10 +96,14 @@ In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**.
 ```bash
 xpm install --global @xpack-dev-tools/openocd@latest --verbose
 ```
-That command will output the location OpenOCD is installed in. You might need to update your PATH variable to make everything a bit more ergonomic.
+That command will output the location OpenOCD is installed in.
 For more details, take a look at the [install page](https://xpack.github.io/openocd/install/).
 
-To check that you've got the correct version:
+Alternatively, you can get OpenOCD from [GitHub Releases](https://github.com/xpack-dev-tools/openocd-xpack/releases).
+
+*You need to update your PATH variable to make everything a bit more ergonomic. You may need to restart applications for this change to take effect. Alternatively, you can use a symbolic link.*
+
+To check that you've got the correct version working:
 ```bash
 openocd --version
 ```
@@ -121,7 +125,7 @@ On `Windows`, make sure openocd and arm-none-eabi-gdb can be found on the path.
 
 
 ### Other tools
-Of course, you're free to use your editor of choice. We will be using Visual Studio Code. To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer).
+Of course, you're free to use your editor of choice.To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer). It's available for many different editors. As for ourselves, we will be using Visual Studio Code along with a couple of extensions. To install them, please use the instructions for [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=matklad.rust-analyzer) and [Cortex Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug).
 
 
 ## Testing
