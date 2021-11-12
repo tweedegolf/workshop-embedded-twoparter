@@ -1,8 +1,6 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # Uncomment the line below to use probe-rs
-# runner = "probe-run --chip nRF52840"
-# Uncomment the line below to use GDB with Cargo Embed
-runner = "gdb-multiarch -x cargo-embed.gdb"
+runner = "probe-run --chip nRF52840"
 # Uncomment the line below to use GDB with OpenOCD
 # runner = "gdb-multiarch -q -x openocd.gdb"
 rustflags = [

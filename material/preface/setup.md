@@ -74,14 +74,36 @@ If you're on windows, we need to install a generic WinUSB driver. You can use [Z
 Then, switch the nRF52840DK off and on or remove the cable and plug it in again.
 
 
-For debugging, we will be using GDB and OpenOCD. On ubuntu, it can be installed with
+For debugging, we will be using GDB and OpenOCD. On Ubuntu, GDB can be installed with:
 ```bash
 sudo apt update
-sudo apt install gdb-multiarch openocd
+sudo apt install gdb-multiarch
 ```
-# TODO installing openocd 0.11 w/ xpack
-https://xpack.github.io/install/
-https://xpack.github.io/openocd/
+
+On Windows: *TODO*
+
+In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**. You can download it using xPack package manager or `xpm`. To install `xpm`, please follow the instructions [on this page](https://xpack.github.io/xpm/install/#). Once xpm is working correctly, you can install OpenOCD with:
+
+```bash
+xpm install --global @xpack-dev-tools/openocd@latest --verbose
+```
+That command will output the location OpenOCD is installed in. You might need to update your PATH variable to make everything a bit more ergonomic.
+For more details, take a look at the [install page](https://xpack.github.io/openocd/install/).
+
+To check that you've got the correct version:
+```bash
+openocd --version
+```
+
+The output should be something like this:
+```bash
+xPack OpenOCD x86_64 Open On-Chip Debugger 0.11.0+dev (2021-10-16-21:15)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+```
+
+**Please verify that you've got version 0.11**
 
 ### Other tools
 Of course, you're free to use your editor of choice. We will be using Visual Studio Code. To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer).
