@@ -51,10 +51,10 @@ cd embedded-workshop
 
 Then, we'll install some tools needed to flash the mcu and inspect the code.
 
-On `Linux` you need to install libudev and libusb. If you're on Ubuntu:
+On `Linux` you need to install the "dev" libraries for udev, usb, and ftdi libudev-dev. If you're on Ubuntu:
 ```bash
 # ubuntu
-sudo apt install -y libusb-1.0-0-dev libftdi1-dev
+sudo apt install -y libusb-1.0-0-dev libftdi1-dev libudev-dev
 ```
 
 On `all platforms`:
