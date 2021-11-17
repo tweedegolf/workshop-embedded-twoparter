@@ -5,7 +5,7 @@ Before we begin, you'll need to check your parts, install some software, and ver
 ## Hardware
 You should have received the following parts:
 
-- nRF52840-DK
+- nRF52840-DK or nRF52-DK
 - Breadboard
 - LIS3DH Breakout board
 - Male-to-male breadboard wires
@@ -78,7 +78,7 @@ sudo udevadm control --reload-rules
 If you're on `windows`, we need to install a generic WinUSB driver. You can use [Zadig](https://zadig.akeo.ie/) to select the usb device that uses the jlink driver and install WinUSB on it. 
 *This will uninstall the official driver, which means that the official Segger tools will not work anymore after this.* To revert, go to `device manager` and uninstall the usb device. The jlink driver will then be used again for that usb connection.
 
-Then, switch the nRF52840DK off and on or remove the cable and plug it in again.
+Then, switch the DK off and on or remove the cable and plug it in again.
 
 ### Debugging
 
@@ -153,12 +153,48 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 
 ### Running the test
 
-To test the hardware, please connect the nrf board to your pc, switch it on, and run
+#### Specific for nRF52-DK
+
+If you're using the nRF52-DK, you need to update the configuration a bit. Edit the first lines of `.cargo/config.toml` from
+
+```toml
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# Uncomment the line below to use probe-rs for nRF52840
+runner = "probe-run --chip nRF52840"
+# Uncomment the line below to use probe-rs for nRF52832
+#runner = "probe-run --chip nRF52832"
+# Uncomment the line below to use GDB with OpenOCD
+# runner = "gdb-multiarch -q -x openocd.gdb"
+<rest of file...>
+```
+
+to
+
+```toml
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# Uncomment the line below to use probe-rs for nRF52840
+#runner = "probe-run --chip nRF52840"
+# Uncomment the line below to use probe-rs for nRF52832
+runner = "probe-run --chip nRF52832"
+# Uncomment the line below to use GDB with OpenOCD
+# runner = "gdb-multiarch -q -x openocd.gdb"
+<rest of file...>
+```
+
+To test the hardware, please connect the nRF52-DK to your pc, switch it on, and run
 ```bash
-cargo run --release -p workshop-examples --bin test
+cargo run --release -p workshop-examples --features=nrf52dk --bin test
 ```
 
 If everything works correctly, you should now see the accelerometer samples being printed on the display. If not, don't worry and contact us.
+#### Specific for nRF52840-DK
+To test the hardware, please connect the nrf52840-DK to your pc, switch it on, and run
+```bash
+cargo run --release -p workshop-examples --features=nrf52840dk --bin test
+```
+
+If everything works correctly, you should now see the accelerometer samples being printed on the display. If not, don't worry and contact us.
+
 
 ## Docs
 Datasheets, manuals, and schematics of the parts we are using in this workshop.
@@ -166,6 +202,9 @@ Datasheets, manuals, and schematics of the parts we are using in this workshop.
 - [nRF52840DK documentation](https://infocenter.nordicsemi.com/topic/ug_nrf52840_dk/UG/dk/intro.html)
 - [nRF52840 product specification](https://infocenter.nordicsemi.com/pdf/nRF52840_PS_v1.2.pdf)
 
+### nRF52832
+- [nRF52-DK documentation](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_nrf52832_dk%2FUG%2Fnrf52_DK%2Fintro.html)
+- [nRF52832 product specification](https://infocenter.nordicsemi.com/pdf/nRF52832_PS_v1.8.pdf)
 ### LIS3DH
 - [Datsheet](https://cdn-learn.adafruit.com/assets/assets/000/085/846/original/lis3dh.pdf?1576396666)
 - [Schematic](https://cdn-learn.adafruit.com/assets/assets/000/028/587/original/sensors_sch.png?1447888851)

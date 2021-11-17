@@ -9,8 +9,8 @@ use hal::{
     uarte::{Baudrate, Parity, Pins},
 };
 use lis3dh::accelerometer::Accelerometer;
-use nrf52840_hal as hal;
-use workshop_examples as _;
+
+use workshop_examples::hal;
 
 #[entry]
 fn start() -> ! {
