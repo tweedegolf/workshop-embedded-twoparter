@@ -129,13 +129,13 @@ Of course, you're free to use your editor of choice. To improve the Rust develop
 
 
 ## Testing
-Before we begin, we need to test our hardware. We'll be testing the LIS3DH accelerometer, as well as the nRF52840DK board. Make sure you have checked out the latest version of the workshop source.
+Before we begin, we need to test our hardware. We'll be testing the LIS3DH accelerometer, as well as the nRF52840-DK or nRF52-DK board. Make sure you have checked out the latest version of the workshop source.
 
 ### LIS3DH accelerometer connection
 First, let's wire up the LIS3DH accelerometer for I2C usage. 
-**Please turn off your nRF52840DK**. Then, wire up the accelerometer, referring to the table below.
+**Please turn off your DK**. Then, wire up the accelerometer, referring to the table below.
 
-| LIS3DH Pin | nRF52840DK pin |
+| LIS3DH Pin | nRF52 pin 	  |
 |------------|----------------|
 | VIN (+)    | VDD            |
 | 3vo        | -              |

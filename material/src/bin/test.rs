@@ -47,7 +47,7 @@ fn start() -> ! {
     );
 
     defmt::println!("Printing message to virtual COM port...");
-    write!(&mut uart, "Hello from Rust on the nRF52840!\r\n").unwrap();
+    write!(&mut uart, "Hello from Rust on the nRF52!\r\n").unwrap();
     defmt::println!("Done! Please check if you received it");
 
     // Set up lis3dh driver over I2C
