@@ -11,7 +11,7 @@ Another means of preparing yourself is by reading up on the Rust language. If yo
 
 The next sections of this site contain the material we'll discuss during the workshop. They contain links to sources and other explanations, so be sure to use them as reference.
 
-Of course, there's also the workshop repository, which contains every file used in this workshop. [You can find it here](https://github.com/tweedegolf/workshop-december-2021).
+Of course, there's also the workshop repository, which contains every file used in this workshop. [You can find it here](https://github.com/tweedegolf/workshop-december-2021). *Note that this repository is still work in progress*
 
 If you have any questions, don't hesitate to contact us.
 

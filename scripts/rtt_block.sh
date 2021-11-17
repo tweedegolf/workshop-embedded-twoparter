@@ -8,4 +8,5 @@ then
 fi
 
 
-rust-nm -S target/thumbv7*/debug/$APP_NAME | grep RTT
+rust-nm -S target/thumbv7*/debug/$APP_NAME | grep RTT | sed -re 's/^(.*) (.*) D _SEGGER_RTT$/RTT block info\nStart address:\t0x\1\nLength:\t\t0x\2/'
+echo "Use this information to inform OpenOCD where it can find the RTT block in .vscode/launch.json"

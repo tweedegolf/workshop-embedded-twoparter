@@ -1,6 +1,8 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# Uncomment the line below to use probe-rs
+# Uncomment the line below to use probe-rs for nRF52840
 runner = "probe-run --chip nRF52840"
+# Uncomment the line below to use probe-rs for nRF52832
+#runner = "probe-run --chip nRF52832"
 # Uncomment the line below to use GDB with OpenOCD
 # runner = "gdb-multiarch -q -x openocd.gdb"
 rustflags = [

@@ -485,6 +485,7 @@ dependencies = [
  "fixed",
  "nb 1.0.0",
  "nrf-usbd",
+ "nrf52832-pac",
  "nrf52840-pac",
  "rand_core",
  "void",
@@ -498,6 +499,28 @@ checksum = "945a178131ac5f69941dadb0d51c8e17cbe34cc09a0e2d51c099160a463751b8"
 dependencies = [
  "cortex-m",
  "usb-device",
+ "vcell",
+]
+
+[[package]]
+name = "nrf52832-hal"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9a13e1eac5cd926fb7cb327122f83ae51718e0f543bcbfbd3e717c216481e8d"
+dependencies = [
+ "embedded-hal",
+ "nrf-hal-common",
+ "nrf52832-pac",
+]
+
+[[package]]
+name = "nrf52832-pac"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76f5dec47cf294f40a53cc62b6d9032a5ffae998c045c517cce5acaf482350d7"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
  "vcell",
 ]
 
@@ -859,6 +882,7 @@ dependencies = [
  "defmt-rtt",
  "embedded-hal",
  "lis3dh",
+ "nrf52832-hal",
  "nrf52840-hal",
  "panic-probe",
 ]
