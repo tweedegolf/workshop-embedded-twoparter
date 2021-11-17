@@ -71,7 +71,7 @@ If you're on `linux`, you'll need to update your udev rules.
 On ubuntu, run the following inside the workshop folder you just cloned;
 
 ```bash
-sudo cp 99-jlink-nrf52840dk.rules /etc/udev/rules.d
+sudo cp 99-jlink-nrf.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 ```
 
