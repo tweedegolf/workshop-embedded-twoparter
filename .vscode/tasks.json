@@ -2,14 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "cargo-build:test",
+            "label": "cargo-build:firmware",
             "type": "cargo",
             "command": "build",
             "args": [
                 "-p",
-                "workshop-examples",
-                "--bin",
-                "test"
+                "firmware",
             ],
             "problemMatcher": [
                 "$rustc"

@@ -10,15 +10,15 @@
             "gdbTarget": "127.0.0.1:3333",
             "gdbPath": "gdb-multiarch",
             "cwd": "${workspaceRoot}",
-            "preLaunchTask": "cargo-build:test",
+            "preLaunchTask": "cargo-build:firmware",
             "runToMain": true,
-            "executable": "./target/thumbv7em-none-eabihf/debug/test",
+            "executable": "./target/thumbv7em-none-eabihf/debug/firmware",
             "device": "nRF52840",
             "svdFile": "${workspaceRoot}/nrf52840.svd",
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
                 "monitor rtt server start 8765 0",
-                "monitor rtt setup 0x2003fbc0 0x30 \"SEGGER RTT\"",
+                "monitor rtt setup 0x2003fb60 0x30 \"SEGGER RTT\"",
                 "monitor rtt start",
             ],
         },
@@ -39,7 +39,7 @@
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
                 "monitor rtt server start 8765 0",
-                "monitor rtt setup 0x2003fbc0 0x30 \"SEGGER RTT\"",
+                "monitor rtt setup 0x2003fb60 0x30 \"SEGGER RTT\"",
                 "monitor rtt start",
             ],
         }
