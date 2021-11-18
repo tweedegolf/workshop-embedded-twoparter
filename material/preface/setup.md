@@ -153,6 +153,8 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 
 ### Running the test
 
+The tests are located in `assignments/test`. Follow the next instructions using that folder.
+
 #### Specific for nRF52-DK
 
 If you're using the nRF52-DK, you need to update the configuration a bit. Edit the first lines of `.cargo/config.toml` from
