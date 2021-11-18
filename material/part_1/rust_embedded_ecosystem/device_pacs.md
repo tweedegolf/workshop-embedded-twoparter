@@ -1,3 +1,5 @@
+<div class="read">
+
 # Device PACs
 
 Most devices have a PAC for their peripherals. These PACs are not handmade, but generated from SVD files.
@@ -37,3 +39,5 @@ dp.WDT.CONFIG.modify(|_, w| w.per()._8());
 ```
 
 All of these examples should produce the same instructions.
+
+</div>

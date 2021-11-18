@@ -1,3 +1,5 @@
+<div class="read">
+
 # Device HALs
 
 Programming using registers forms the basis of everything, but usually we want to work on more higher level components.
@@ -48,3 +50,5 @@ fn TIMER0() {
 ```
 
 If you're paying attention, you'll see that we have an extra dependency called `embedded_hal` and this is what the next chapter is about.
+
+</div>

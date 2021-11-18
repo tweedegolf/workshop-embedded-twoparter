@@ -1,3 +1,5 @@
+<div class="read">
+
 # Embedded-hal
 
 [Embedded-hal](https://crates.io/crates/embedded-hal) is a crate that glues the entire Rust embedded ecosystem together.
@@ -30,3 +32,5 @@ This is used everywhere even to the point that if you see a device driver or a H
 that you would be surprise to see that.
 
 Pretty much every major HAL implements the traits and pretty much every device driver accepts these traits.
+
+</div>

@@ -1,3 +1,5 @@
+<div class="read">
+
 # Cortex-m PAC & cortex-m-rt
 
 Most of embedded Rust is built around the Arm Cortex M microcontollers. These chips have gotten very popular the last decade, but now there's increasing interest in and support for Risc-V.
@@ -21,3 +23,5 @@ This crates takes care of:
 It also gives some tools to set up the program entry and interrupt functions.
 
 All C projects have to do this as well, so often there's a generated file that may have the name `startup` or something similar.
+
+</div>
