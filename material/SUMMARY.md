@@ -5,7 +5,6 @@
 [Course overview](preface/curriculum.md)
 
 [Setting up](preface/setup.md)
-
  - [Part 1: Overview and drivers](part_1/introduction.md)
    - [Exploring the ecosystem](part_1/rust_embedded_ecosystem/introduction.md)
      - [Cortex-m crates](part_1/rust_embedded_ecosystem/cortex-m_crates.md)
@@ -26,3 +25,11 @@
    - [Exercise: Create a driver for the LIS3DH](part_1/exercise_lis3dh_driver/exercise.md)
      - [Solution](part_1/exercise_lis3dh_driver/solution.md)
  - [Part 2: Rust in IoT]()
+    - [Overview](./part_2/overview.md)
+    - [Rust and Cargo](./part_2/cargo/1.md)
+    - [Development environment](./part_2/dev_env/1.md)
+    - [Knurling-rs](./part_2/knurling/1.md)
+    - [RTIC](./part_2/rtic/1.md)
+    - [Server-sided Rust](./part_2/server/1.md)
+    - [Common data format](./part_2/common_format/1.md)
+    - [Exercise: Communicate between firmware and server](./part_2/assignment.md)

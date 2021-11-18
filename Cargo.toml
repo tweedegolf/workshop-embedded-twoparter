@@ -1,8 +1,10 @@
 [workspace]
 members = [
     "material",
-    "material/testsuite",
-    # "assignments"
+    "assignments/part_2/firmware",
+    "assignments/part_2/format",
+    "assignments/part_2/cli",
+    # "assignments/part_2/testsuite",
 ]
 
 

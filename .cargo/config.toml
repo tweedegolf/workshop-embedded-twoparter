@@ -24,7 +24,5 @@ target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
 
 # Some cargo command aliases for convenience. Add you own at will
 [alias]
-rb = "run  -p assignments --bin"
-rrb = "run  -p assignments --release --bin"
-gdb = "run -p assignments --bin"
-gdbserver = "embed --chip nRF52840 -p assignments --bin"
+run-linux = "run --target x86_64-unknown-linux-gnu"
+run-windows = "run --target x86_64-pc-windows-gnu"
