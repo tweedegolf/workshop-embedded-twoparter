@@ -18,7 +18,7 @@
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
                 "monitor rtt server start 8765 0",
-                "monitor rtt setup 0x2003fb60 0x30 \"SEGGER RTT\"",
+                "monitor rtt setup 0x2003fb48 0x30 \"SEGGER RTT\"",
                 "monitor rtt start",
             ],
         },
