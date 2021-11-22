@@ -71,7 +71,7 @@ If you're on `linux`, you'll need to update your udev rules.
 On ubuntu, run the following inside the workshop folder you just cloned;
 
 ```bash
-sudo cp 99-jlink-nrf52840dk.rules /etc/udev/rules.d
+sudo cp 99-jlink-nrf.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 ```
 
@@ -152,6 +152,8 @@ First, let's wire up the LIS3DH accelerometer for I2C usage.
 *We'll be using other pins later on, but they're not needed to test the hardware*
 
 ### Running the test
+
+The tests are located in `assignments/test`. Follow the next instructions using that folder.
 
 #### Specific for nRF52-DK
 
