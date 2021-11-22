@@ -18,7 +18,7 @@
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
                 "monitor rtt server start 8765 0",
-                "source .vscode/rtt.gdb",
+                "monitor rtt setup 0x2003fb48 0x30 \"SEGGER RTT\"",
                 "monitor rtt start",
             ],
         },
@@ -33,15 +33,20 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "cargo-build:test",
             "runToMain": true,
-            "executable": "./target/thumbv7em-none-eabihf/debug/firmware",
+            "executable": "./target/thumbv7em-none-eabihf/debug/test",
             "device": "nRF52832",
             "svdFile": "${workspaceRoot}/nrf52832.svd",
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
                 "monitor rtt server start 8765 0",
-                "source .vscode/rtt.gdb",
+                "monitor rtt setup 0x2003fb60 0x30 \"SEGGER RTT\"",
                 "monitor rtt start",
             ],
-        },
+        }
     ],
+    "inputs": [{
+        "id": "rtt_firmware",
+        "type": "command",
+        "command": "${workspaceRoot}/scripts.rtt_block firmware"
+    }]
 }

@@ -2,4 +2,5 @@ book
 target
 
 !.vscode
-.vscode/.cortex-debug*.state.json
+*/**/.vscode/.cortex-debug*.state.json
+*/**/.vscode/*.gdb

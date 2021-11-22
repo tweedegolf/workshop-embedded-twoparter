@@ -3,11 +3,11 @@
     "tasks": [
         {
             "label": "cargo-build:firmware",
-            "type": "shell",
-            "command": "/bin/bash",
+            "type": "cargo",
+            "command": "build",
             "args": [
-                "-c",
-                "DEFMT_LOG=debug cargo build -p firmware && scripts/rtt_block.sh firmware",
+                "-p",
+                "firmware",
             ],
             "problemMatcher": [
                 "$rustc"

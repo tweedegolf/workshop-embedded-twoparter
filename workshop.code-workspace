@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "part_2",
+			"path": "assignments/part_2"
+		},
+		{
+			"name": "part_1",
+			"path": "assignments/part_1"
+		},
+		{
+			"name": "test",
+			"path": "assignments/test"
+		}
+	],
+	"settings": {}
+}
