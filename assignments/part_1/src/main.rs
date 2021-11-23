@@ -4,6 +4,8 @@
 use rtt_target::{rprintln, rtt_init_print};
 use nrf52840_hal as hal;
 
+mod lis3dh;
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let _cp = cortex_m::Peripherals::take().unwrap();
