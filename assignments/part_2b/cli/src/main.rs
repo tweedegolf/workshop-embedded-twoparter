@@ -1,12 +1,12 @@
-use std::{thread, time::Duration};
 
 use clap::{App, Arg};
-use format::{DeviceToServer, ServerToDevice};
+use format::DeviceToServer;
 use serialport::{SerialPortType, UsbPortInfo};
 
 use crate::serial::TxPort;
 
 mod serial;
+mod cmd;
 
 fn handle_message(msg: DeviceToServer) {
     println!("Got message: {:?}", msg);
@@ -14,15 +14,8 @@ fn handle_message(msg: DeviceToServer) {
 }
 
 fn run<const N: usize>(mut tx_port: TxPort<N>) {
-    let mut send_acc_data = true;
-    loop {
-        let msg = ServerToDevice { send_acc_data };
-
-        println!("Sending message: {:?}", &msg);
-        tx_port.write_message(&msg);
-        send_acc_data = !send_acc_data;
-        thread::sleep(Duration::from_millis(200));
-    }
+    // TODO run your own command parser
+    let _ = &mut tx_port;
 }
 
 fn main() {
@@ -46,21 +39,19 @@ fn main() {
 }
 
 fn listen(port_name: &str) {
-    let mut port = serialport::new(port_name, 115200)
-        .timeout(Duration::from_millis(1000))
-        .open();
+    let port = serial::SerialPort::new(port_name.to_owned());
 
     match port {
         Ok(port) => {
-            let tx_port: TxPort<32> = TxPort::new(port.try_clone().unwrap());
+            let (tx_port, mut rx_port): (TxPort<32>, _) = port.split();
 
-            let rx_thread = std::thread::spawn(|| {
-                serial::RxPort::new(port).run_read_task::<_, 32>(handle_message)
+            let rx_thread = std::thread::spawn(move || {
+                rx_port.run_read_task::<_, 32>(handle_message)
             });
 
             run(tx_port);
 
-            rx_thread.join();
+            rx_thread.join().unwrap();
         }
         Err(e) => {
             eprintln!("Error opening serial port {}: {}", port_name, e);
