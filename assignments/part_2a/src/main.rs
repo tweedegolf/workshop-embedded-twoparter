@@ -28,7 +28,7 @@ use lis3dh::Lis3dhI2C;
 use lis3dh::SlaveAddr;
 use lis3dh::accelerometer::Accelerometer;
 
-type Accelerometer = Lis3dh<Lis3dhI2C<Twim<TWIM0>>>;
+type Lis3dhInstance = Lis3dh<Lis3dhI2C<Twim<TWIM0>>>;
 
 #[rtic::app(
     device=firmware::hal::pac,
@@ -40,7 +40,7 @@ const APP: () = {
         gpiote: Gpiote,
         timer0: Timer<TIMER0, Periodic>,
         led1: Pin<Output<PushPull>>,
-        // TODO accelerometer: Accelerometer,
+        // TODO accelerometer: Lis3dhInstance,
     }
 
     // Initialize peripherals, before interrupts are unmasked
