@@ -1,17 +1,42 @@
 {
 	"folders": [
 		{
-			"name": "part_2",
-			"path": "assignments/part_2"
+			"name": "Part 1",
+			"path": "assignments/part_1"
 		},
 		{
-			"name": "part_1",
-			"path": "assignments/part_1"
+			"name": "Part 2A",
+			"path": "assignments/part_2a"
+		},
+		{
+			"name": "Part 2B",
+			"path": "assignments/part_2b"
 		},
 		{
 			"name": "test",
 			"path": "assignments/test"
 		}
 	],
-	"settings": {}
+	"settings": {
+		// override the default setting (`cargo check --all-targets`) which produces the following error
+		// "can't find crate for `test`" when the default compilation target is a no_std target
+		// with these changes RA will call `cargo check --bins` on save
+		"rust-analyzer.checkOnSave.allTargets": false,
+		"rust-analyzer.checkOnSave.extraArgs": [
+			"--bins"
+		]
+	},
+	"extensions": {
+		// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+		// Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
+		// List of extensions which should be recommended for users of this workspace.
+		"recommendations": [
+			"matklad.rust-analyzer",
+			"marus25.cortex-debug",
+		],
+		// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
+		"unwantedRecommendations": [
+			"rust-lang.rust",
+		]
+	}
 }
