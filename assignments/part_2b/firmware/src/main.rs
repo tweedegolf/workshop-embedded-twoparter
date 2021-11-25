@@ -3,7 +3,7 @@
 
 use firmware::hal;
 
-use firmware::uarte::{Baudrate, Parity, Pins, Uarte};
+use firmware::uarte::{Baudrate, Parity, Pins as UartePins, TimeoutUarte};
 
 #[allow(unused_imports)]
 use hal::prelude::*;
@@ -24,13 +24,14 @@ use postcard::CobsAccumulator;
     monotonic=rtic::cyccnt::CYCCNT
 )]
 const APP: () = {
+    // The resources that are to be shared between tasks
     struct Resources {
         accumulator: CobsAccumulator<32>,
-        uarte0: Uarte<UARTE0, TIMER0, Ppi0>,
+        uarte0: TimeoutUarte<UARTE0, TIMER0, Ppi0>,
     }
 
     // Initialize peripherals, before interrupts are unmasked
-    // Returns all resources that need to be dynamically instantiated
+    // Initializes and returns all resources that need to be dynamically instantiated
     #[init(spawn = [read_uarte0])]
     fn init(ctx: init::Context) -> init::LateResources {
         // Initialize UARTE0
@@ -39,14 +40,14 @@ const APP: () = {
         // Initialize PPI
         let ppi = ppi::Parts::new(ctx.device.PPI);
 
-        // Receiving pin, initialize as input
+        // UART Receiving pin, initialize as input
         let rxd = port0.p0_08.into_floating_input().degrade();
 
-        // Transmitting pin, initialize as output
+        // UART Transmitting pin, initialize as output
         let txd = port0.p0_06.into_push_pull_output(Level::Low).degrade(); // Erase the type, creating a generic pin
 
         // Create Pins struct to pass to Uarte
-        let uart_pins = Pins {
+        let uarte_pins = UartePins {
             rxd,
             txd,
             // We don't use cts/rts
@@ -58,18 +59,19 @@ const APP: () = {
         // so the device can react to commands even if the
         // UARTE0 RX FIFO is not yet full
         let mut timer0 = Timer::periodic(ctx.device.TIMER0);
-        timer0.start(200_000u32); // 100 ms
+        timer0.start(200_000u32); // 200 ms period
 
         // Initialize UARTE0 peripheral with standard configuration
-        let uarte0 = Uarte::init(
+        let uarte0 = TimeoutUarte::init(
             ctx.device.UARTE0, // Take peripheral handle by value
-            uart_pins,         // Take pins by value
+            uarte_pins,        // Take pins by value
             Parity::EXCLUDED,
             Baudrate::BAUD115200,
-            timer0,
-            ppi.ppi0,
+            timer0,            // Take TIMER0 by value
+            ppi.ppi0,          // Take PPI channel 0 by value
         );
 
+        // An accumulator for postcard-COBS messages
         let accumulator = CobsAccumulator::new();
 
         init::LateResources {
@@ -87,19 +89,26 @@ const APP: () = {
         }
     }
 
-    #[task(capacity = 5, spawn = [send_message], priority = 10)]
+    // Do something with a message that just came in
+    #[task(capacity = 5, priority = 10)]
     fn handle_message(ctx: handle_message::Context, msg: ServerToDevice) {
         defmt::println!("Received message: {:?}. What do I need to do now?", msg);
-        ctx.spawn
-            .send_message(DeviceToServer { led_status: true })
-            .expect("Could not spawn send_message task");
+        // TODO react to an incoming message, possibly by spawning a task
+        let _ = ctx; // Suppress unused_variable warning
     }
 
+    // Send a message over UARTE0
+    // This task waits until the last TX transaction is completed
     #[task(capacity = 10, resources = [uarte0], priority  = 1)]
     fn send_message(mut ctx: send_message::Context, msg: DeviceToServer) {
         defmt::info!("Sending message: {:?}", &msg);
         let mut buf = [0; 32];
+        // Serialize message
         if let Ok(bytes) = postcard::to_slice_cobs(&msg, &mut buf) {
+            // Repeatedly try to write the message. We need to lock uarte0 here,
+            // as this task might be pre-empted by another task that uses uarte0.
+            // uarte0.try_start_tx returns an Err variant if there is already a
+            // TX transaction going on.
             while let Err(_) = ctx
                 .resources
                 .uarte0
@@ -118,6 +127,7 @@ const APP: () = {
         defmt::debug!("Done sending message");
     }
 
+    // React to an interrupt from UARTE0
     #[task(
         binds = UARTE0_UART0,
         priority = 100,
@@ -130,14 +140,25 @@ const APP: () = {
 
         ctx.resources
             .uarte0
+            // We need to lock here, as this task might be pre-empted by 
+            // higher-priority tasks that use uarte0.
             .lock(|uarte0| match uarte0.get_clear_event() {
                 Some(EndRx) => {
+                    // Read transaction ended, spawn read task
                     ctx.spawn.read_uarte0().ok();
+                },
+                Some(EndTx) => {
+                    // This event causes the running 
+                    // send_message task to try sending once more.
+                    // No need to handle it here.
                 }
                 _ => (),
             });
     }
 
+    // Software task that reads the UARTE0 DMA buffer,
+    // deserializes the data, and spawns the `handle_message`
+    // task.
     #[task(
         priority = 101,
         resources = [uarte0, accumulator],
@@ -146,7 +167,9 @@ const APP: () = {
     fn read_uarte0(ctx: read_uarte0::Context) {
         use postcard::FeedResult::*;
 
-        // We have ownership declared in the resources
+        // No need to lock here, as from all tasks that use
+        // uarte0 or the accumulator, this task has the highest priority
+        // and will therefore not be pre-empted.
         let chunk = ctx.resources.uarte0.get_rx_chunk();
         match ctx.resources.accumulator.feed(chunk) {
             Consumed => {}
@@ -161,7 +184,7 @@ const APP: () = {
 
     // RTIC requires that unused interrupts are declared in an extern block when
     // using software tasks; these interrupts will be used to dispatch the
-    // software tasks.
+    // software tasks. For every software task, one interrupt must be sacraficed.
     // See https://rtic.rs/0.5/book/en/by-example/tasks.html;
     extern "C" {
         // Software interrupt 0 / Event generator unit 0
