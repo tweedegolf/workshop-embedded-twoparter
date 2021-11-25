@@ -1,23 +1,43 @@
+use core::marker::PhantomData;
+
 use crate::hal;
 
-pub use hal::uarte::{Baudrate, Instance, Parity, Pins, Uarte as HalUarte};
+pub use hal::uarte::{Baudrate, Instance as UarteInstance, Parity, Pins, Uarte as HalUarte};
+use hal::{
+    ppi::ConfigurablePpi,
+    timer::{Instance as TimerInstance, Periodic},
+    Timer,
+};
 
 use self::rx_buffer::UarteRxBuffer;
-
 pub enum UarteEvent {
     EndRx,
     EndTx,
     // Add more variants as you expect more to occur
 }
 
-pub struct Uarte<U> {
+pub struct Uarte<U, T, P> {
     uarte: U,
     buffer: UarteRxBuffer,
     endtx_raised: bool,
+    timer: T,
+    ppi_channel: PhantomData<P>,
 }
 
-impl<U: Instance> Uarte<U> {
-    pub fn init(uarte: U, pins: Pins, parity: Parity, baudrate: Baudrate) -> Self {
+impl<U, T, P> Uarte<U, T, P>
+where
+    U: UarteInstance,
+    T: TimerInstance,
+    P: ConfigurablePpi,
+{
+    pub fn init(
+        uarte: U,
+        pins: Pins,
+        parity: Parity,
+        baudrate: Baudrate,
+        timer: Timer<T, Periodic>,
+        mut ppi_channel: P,
+    ) -> Self {
         let buffer = UarteRxBuffer::take().expect("UarteRxBuffer is already taken");
 
         // We want to use advanced features that the HAL sadly does not implement.
@@ -57,10 +77,19 @@ impl<U: Instance> Uarte<U> {
             .write(|w| w.endrx().set_bit().endtx().set_bit());
         uarte.tasks_startrx.write(|w| unsafe { w.bits(0x01) });
 
+        let timer = timer.free();
+        let timer_block = timer.as_timer0();
+
+        ppi_channel.set_task_endpoint(&uarte.tasks_stoprx);
+        ppi_channel.set_event_endpoint(&timer_block.events_compare[0]);
+        ppi_channel.enable();
+
         Self {
             uarte,
             buffer,
             endtx_raised: false,
+            timer,
+            ppi_channel: PhantomData,
         }
     }
 

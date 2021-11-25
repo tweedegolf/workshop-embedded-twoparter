@@ -11,9 +11,9 @@ use hal::prelude::*;
 use embedded_hal::timer::CountDown;
 use format::{DeviceToServer, ServerToDevice};
 use hal::{
-    gpio::{p0::Parts, Level},
+    gpio::{p0, Level},
     pac::{TIMER0, UARTE0},
-    timer::Periodic,
+    ppi::{self, Ppi0},
     Timer,
 };
 use postcard::CobsAccumulator;
@@ -26,8 +26,7 @@ use postcard::CobsAccumulator;
 const APP: () = {
     struct Resources {
         accumulator: CobsAccumulator<32>,
-        uarte0: Uarte<UARTE0>,
-        timer0: Timer<TIMER0, Periodic>,
+        uarte0: Uarte<UARTE0, TIMER0, Ppi0>,
     }
 
     // Initialize peripherals, before interrupts are unmasked
@@ -36,7 +35,9 @@ const APP: () = {
     fn init(ctx: init::Context) -> init::LateResources {
         // Initialize UARTE0
         // Initialize port0
-        let port0 = Parts::new(ctx.device.P0);
+        let port0 = p0::Parts::new(ctx.device.P0);
+        // Initialize PPI
+        let ppi = ppi::Parts::new(ctx.device.PPI);
 
         // Receiving pin, initialize as input
         let rxd = port0.p0_08.into_floating_input().degrade();
@@ -53,26 +54,26 @@ const APP: () = {
             rts: None, // Request to send pin
         };
 
+        // A timer that is used to time-out UARTE0 read transactions,
+        // so the device can react to commands even if the
+        // UARTE0 RX FIFO is not yet full
+        let mut timer0 = Timer::periodic(ctx.device.TIMER0);
+        timer0.start(200_000u32); // 100 ms
+
         // Initialize UARTE0 peripheral with standard configuration
         let uarte0 = Uarte::init(
             ctx.device.UARTE0, // Take peripheral handle by value
             uart_pins,         // Take pins by value
             Parity::EXCLUDED,
             Baudrate::BAUD115200,
+            timer0,
+            ppi.ppi0,
         );
-
-        // A timer that is used to time-out UARTE0 read transactions,
-        // so the device can react to commands even if the
-        // UARTE0 RX FIFO is not yet full
-        let mut timer0 = Timer::periodic(ctx.device.TIMER0);
-        timer0.enable_interrupt();
-        timer0.start(200_000u32); // 100 ms
 
         let accumulator = CobsAccumulator::new();
 
         init::LateResources {
             uarte0,
-            timer0,
             accumulator,
         }
     }
@@ -104,7 +105,7 @@ const APP: () = {
                 .uarte0
                 .lock(|uarte0| uarte0.try_start_tx(&bytes))
             {
-                defmt::debug!("Waiting for currently running tx task to finish");
+                defmt::trace!("Waiting for currently running tx task to finish");
                 // Go to sleep to avoid busy waiting
                 cortex_m::asm::wfi();
             }
@@ -118,27 +119,6 @@ const APP: () = {
     }
 
     #[task(
-        binds = TIMER0,
-        priority = 99,
-        resources = [timer0, uarte0],
-    )]
-    fn on_timer0(mut ctx: on_timer0::Context) {
-        let timer0 = ctx.resources.timer0;
-        defmt::debug!("Running task on_timer 0");
-        if timer0.event_compare_cc0().read().bits() != 0x00u32 {
-            timer0.event_compare_cc0().write(|w| unsafe { w.bits(0) });
-            // We need to lock here, because the on_uarte0 task could also access
-            // uarte0_rx, and as that task has a higher priority, it could pre-empt
-            // the current task.
-            ctx.resources.uarte0.lock(|uarte0| {
-                // Stop current read transaction. Fluhes the Uarte FIFO,
-                // and triggers and ENDRX event, which triggers on_uarte0
-                uarte0.stop_rx_task();
-            });
-        }
-    }
-
-    #[task(
         binds = UARTE0_UART0,
         priority = 100,
         resources = [uarte0],
@@ -146,7 +126,7 @@ const APP: () = {
     )]
     fn on_uarte0(mut ctx: on_uarte0::Context) {
         use firmware::uarte::UarteEvent::*;
-        defmt::debug!("Running task on_uarte0");
+        defmt::trace!("Running task on_uarte0");
 
         ctx.resources
             .uarte0
