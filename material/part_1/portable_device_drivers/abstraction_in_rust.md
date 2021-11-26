@@ -94,7 +94,7 @@ pub fn make_assembly_show_up() {
 }
 ```
 
-Now we can look at the assembly using the [cargo asm]() tool:
+Now we can look at the assembly using the [cargo asm](https://crates.io/crates/cargo-asm) tool:
 
 ```bash
 $ cargo asm workshop_code::make_assembly_show_up
