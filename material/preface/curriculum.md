@@ -2,7 +2,7 @@
 
 # Course overview
 
-## Part 1: Overview of the Rust embedded ecosystem + writing a platform-agnostic driver
+## Part 1: Overview of the Rust embedded ecosystem + writing a portable driver
 
 *Exploring the basics of Rust embedded programming.*
 
@@ -19,7 +19,7 @@
   - Typestate
   - Runtimes
 - Exercise: LIS3DH ID
-- Platform-agnostic drivers
+- Portable drivers
   - Abstraction in C
   - Abstraction in Rust
   - Low level & high level drivers

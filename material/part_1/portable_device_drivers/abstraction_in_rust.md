@@ -8,7 +8,7 @@ We can put Rust's strong typesystem and generics to good use and integrate `embe
 
 ## Traits and generics
 
-Embedded-hal has defined a standard set of traits for us to use. We'll use them as well so we can be platform agnostic.
+Embedded-hal has defined a standard set of traits for us to use. We'll use them as well so we can be portable.
 
 We need two traits:
 
