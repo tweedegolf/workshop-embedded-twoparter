@@ -23,4 +23,6 @@ To use that project, you can use the following commands from inside that folder 
 
 In both cases you can add the `--release` flag to turn on optimizations.
 
+*Note: There is a module called `lis3dh` in the assignment project. This is meant to be used in the second assignment, so can be ignored for now.*
+
 </div>
