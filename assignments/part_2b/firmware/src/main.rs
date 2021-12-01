@@ -67,8 +67,8 @@ const APP: () = {
             uarte_pins,        // Take pins by value
             Parity::EXCLUDED,
             Baudrate::BAUD115200,
-            timer0,            // Take TIMER0 by value
-            ppi.ppi0,          // Take PPI channel 0 by value
+            timer0,   // Take TIMER0 by value
+            ppi.ppi0, // Take PPI channel 0 by value
         );
 
         // An accumulator for postcard-COBS messages
@@ -90,11 +90,23 @@ const APP: () = {
     }
 
     // Do something with a message that just came in
-    #[task(capacity = 5, priority = 10)]
+    #[task(capacity = 5, priority = 10, spawn = [send_message])]
     fn handle_message(ctx: handle_message::Context, msg: ServerToDevice) {
         defmt::println!("Received message: {:?}. What do I need to do now?", msg);
-        // TODO react to an incoming message, possibly by spawning a task
-        let _ = ctx; // Suppress unused_variable warning
+        let ServerToDevice { say_hello, set_led_status, .. } = msg;
+
+        if say_hello {
+            ctx.spawn
+            .send_message(DeviceToServer {
+                said_hello: true,
+                ..DeviceToServer::default()
+            })
+            .ok();
+        }
+
+        if let Some((led_id, enabled)) = set_led_status {
+            // TODO react to an incoming message, possibly by spawning a newly defined task
+        }
     }
 
     // Send a message over UARTE0
@@ -140,15 +152,15 @@ const APP: () = {
 
         ctx.resources
             .uarte0
-            // We need to lock here, as this task might be pre-empted by 
+            // We need to lock here, as this task might be pre-empted by
             // higher-priority tasks that use uarte0.
             .lock(|uarte0| match uarte0.get_clear_event() {
                 Some(EndRx) => {
                     // Read transaction ended, spawn read task
                     ctx.spawn.read_uarte0().ok();
-                },
+                }
                 Some(EndTx) => {
-                    // This event causes the running 
+                    // This event causes the running
                     // send_message task to try sending once more.
                     // No need to handle it here.
                 }

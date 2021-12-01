@@ -1,21 +1,54 @@
+use std::{io::Write, time::Duration, thread};
 
 use clap::{App, Arg};
 use format::DeviceToServer;
 use serialport::{SerialPortType, UsbPortInfo};
 
-use crate::serial::TxPort;
+use crate::{cmd::CommandParser, serial::TxPort};
 
-mod serial;
 mod cmd;
+mod serial;
 
 fn handle_message(msg: DeviceToServer) {
     println!("Got message: {:?}", msg);
+    let DeviceToServer { led_status, said_hello } = msg;
+    if said_hello {
+        println!("Device said hello!");
+    }
+
+    if let Some((led_id, enabled)) = led_status {
+        let status = match enabled {
+            true => "on",
+            false => "off",
+        };
+        println!("Led {} status: {}", led_id, status);
+    }
     // TODO, do cool stuff with the message that just came in.
 }
 
 fn run<const N: usize>(mut tx_port: TxPort<N>) {
-    // TODO run your own command parser
-    let _ = &mut tx_port;
+    use crate::cmd::ParseError::*;
+    use std::io::BufRead;
+
+    let stdin = std::io::stdin();
+    println!("Welcome to the device Commander! Please enter your command and press Enter");
+    let mut lines = stdin.lock().lines();
+    loop {
+        if let Some(line) = lines.next() {
+            match CommandParser::parse(&line.unwrap()) {
+                Ok(cmd) => {
+                    let msg = cmd.build_message();
+
+                    tx_port.write_message(&msg).unwrap();
+                    println!("Command sent!");
+                }
+                Err(CommandNotFound) => eprintln!("Error: Command not found"),
+                Err(InvalidArgs) => eprintln!("Error: Command arguments invalid"),
+            }
+        } else {
+            break;
+        }
+    }
 }
 
 fn main() {
@@ -45,9 +78,8 @@ fn listen(port_name: &str) {
         Ok(port) => {
             let (tx_port, mut rx_port): (TxPort<32>, _) = port.split();
 
-            let rx_thread = std::thread::spawn(move || {
-                rx_port.run_read_task::<_, 32>(handle_message)
-            });
+            let rx_thread =
+                thread::spawn(move || rx_port.run_read_task::<_, 32>(handle_message));
 
             run(tx_port);
 
