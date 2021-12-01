@@ -30,8 +30,8 @@ pub struct CommandParser;
 
 impl CommandParser {
     pub fn parse(cmd: &str) -> Result<Box<dyn Command>, ParseError> {
-        let chunks = cmd.split(' ').peekable().clone();
-
+        let chunks = cmd.split(' ').peekable();
+        
         fn parse_next<'c, C: Command>(
             chunks: ChunkIter<'c>,
         ) -> impl FnOnce(ParseError) -> Result<Box<dyn Command>, ParseError> + 'c {
@@ -40,8 +40,11 @@ impl CommandParser {
                 r => Err(r),
             }
         }
-
-        LedStatus::parse(chunks.clone()).or_else(parse_next::<SayHello>(chunks.clone()))
+        
+        // Iterators are stateful, so we need to clone
+        LedStatus::parse(chunks.clone())
+            // TODO parse other commands, chaining calls like this:
+            .or_else(parse_next::<SayHello>(chunks.clone()))
     }
 }
 
@@ -64,8 +67,11 @@ mod commands {
         where
             Self: Sized,
         {
+            // Get first word
             let cmd = chunks.next();
+            // Get second word and parse as byte
             let arg1: Option<u8> = chunks.next().map(|a| a.parse().ok()).flatten();
+            // Get third word and parse as bool: "on" -> true, "off" -> false
             let arg2: Option<bool> = chunks
                 .next()
                 .map(|a| match a {
@@ -76,8 +82,14 @@ mod commands {
                 .flatten();
 
             match (cmd, arg1, arg2) {
+                // Accepted if first word equals "led", 
+                // arg1 is between 1 and 4 (inclusive)
+                // and arg2 was parsed successfully
                 (Some("led"), Some(led_no @ 1..=4), Some(on)) => Ok(Self { led_no, on }.boxed()),
+                // Invalid arguments if first word equeals "led",
+                // but the rest does not match
                 (Some("led"), _, _) => Err(InvalidArgs),
+                // Not found otherwise, try to parse another command
                 _ => Err(CommandNotFound),
             }
         }
@@ -98,10 +110,13 @@ mod commands {
         where
             Self: Sized,
         {
+            // Get first word
             let cmd = chunks.next();
 
             match cmd {
+                // Accepted if the first word was "hello"
                 Some("hello") => Ok(Self.boxed()),
+                // Not found otherwise
                 _ => Err(CommandNotFound),
             }
         }

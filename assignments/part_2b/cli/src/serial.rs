@@ -36,6 +36,9 @@ impl RxPort {
         Self { port }
     }
 
+    /// Starts listening for incoming  data on the serial port, and 
+    /// tries to parse incoming data. Calls `on_msg` when a new message
+    /// was received and parsed sucessfully.
     pub fn run_read_task<F: Fn(DeviceToServer) -> (), const N: usize>(&mut self, on_msg: F) {
         let mut accumulator = CobsAccumulator::<32>::new();
         let mut serial_buf = [0u8; N];
@@ -46,7 +49,9 @@ impl RxPort {
                 .read(&mut serial_buf)
                 .or_else(|e| {
                     if e.kind() == std::io::ErrorKind::TimedOut {
-                        Ok(0) // Just a time out
+                        // Just a time out before 
+                        // the buffer is full, no need to worry
+                        Ok(0) 
                     } else {
                         Err(e)
                     }
@@ -58,7 +63,7 @@ impl RxPort {
                 Consumed => {} // Do nothing
                 OverFull(_) => eprintln!("Accumulator full, dropping contents"),
                 DeserError(_) => eprintln!("Deserialize error, throwing away message"),
-                Success { data, .. } => on_msg(data),
+                Success { data, .. } => on_msg(data), // Handle message
             }
         }
     }

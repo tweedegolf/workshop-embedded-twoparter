@@ -1,4 +1,4 @@
-use std::{io::Write, time::Duration, thread};
+use std::thread;
 
 use clap::{App, Arg};
 use format::DeviceToServer;
@@ -26,7 +26,10 @@ fn handle_message(msg: DeviceToServer) {
     // TODO, do cool stuff with the message that just came in.
 }
 
-fn run<const N: usize>(mut tx_port: TxPort<N>) {
+/// Starts a simple REPL with which you can
+/// send commands to the device. Take a look
+/// in `cmd.rs` if you want to implement you own command
+fn repl<const N: usize>(mut tx_port: TxPort<N>) {
     use crate::cmd::ParseError::*;
     use std::io::BufRead;
 
@@ -63,7 +66,7 @@ fn main() {
         .get_matches();
 
     if let Some(port_name) = matches.value_of("PORT") {
-        listen(port_name)
+        run(port_name)
     } else {
         eprintln!("Please specify port as the first argument. For help, run with --help");
         eprintln!();
@@ -71,17 +74,18 @@ fn main() {
     }
 }
 
-fn listen(port_name: &str) {
+fn run(port_name: &str) {
     let port = serial::SerialPort::new(port_name.to_owned());
 
     match port {
         Ok(port) => {
             let (tx_port, mut rx_port): (TxPort<32>, _) = port.split();
 
+            // Start a new thread on which we listen for data from the serial port
             let rx_thread =
                 thread::spawn(move || rx_port.run_read_task::<_, 32>(handle_message));
 
-            run(tx_port);
+            repl(tx_port);
 
             rx_thread.join().unwrap();
         }
@@ -93,6 +97,8 @@ fn listen(port_name: &str) {
     }
 }
 
+
+/// Lists available ports in stdout
 fn print_available_ports() {
     println!("Available ports (listing USB only):");
     for port in serialport::available_ports().unwrap() {

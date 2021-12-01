@@ -106,6 +106,7 @@ const APP: () = {
 
         if let Some((led_id, enabled)) = set_led_status {
             // TODO react to an incoming message, possibly by spawning a newly defined task
+            // Don't forget to declare it!
         }
     }
 
