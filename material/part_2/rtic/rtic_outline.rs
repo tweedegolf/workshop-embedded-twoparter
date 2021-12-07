@@ -66,7 +66,7 @@ const APP: () = {
         // - snip -
     }
 
-    // 'Sacraficed' interrupts
+    // 'Sacrificed' interrupts
     extern "C" {
         // Software interrupt 0 / Event generator unit 0
         fn SWI0_EGU0();

@@ -7,7 +7,7 @@
             "command": "/bin/bash",
             "args": [
                 "-c",
-                "DEFMT_LOG=debug cargo build -p firmware && scripts/rtt_block.sh firmware",
+                "cargo build -p firmware && scripts/rtt_block.sh firmware",
             ],
             "problemMatcher": [
                 "$rustc"

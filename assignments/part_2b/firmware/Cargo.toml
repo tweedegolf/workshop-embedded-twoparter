@@ -8,16 +8,14 @@ edition = "2021"
 [dependencies]
 cortex-m = "0.7.3"
 cortex-m-rt = "0.6.15"
-
-defmt = "0.3.0"
-defmt-rtt = "0.3.0"
 embedded-hal = "0.2.6"
 heapless = "0.7.8"
 lis3dh = "0.4.1"
-panic-probe = { version = "0.3.0", features = ["print-defmt"] }
+rtt-target = { version = "0.3.1", features = ["cortex-m"] }
+panic-probe = { version = "0.3.0", features = ["print-rtt"] }
 postcard = "0.7.0"
 
-format = { path = "../format", features = ["defmt"] }
+format = { path = "../format" }
 nb = "1.0.0"
 
 [dependencies.cortex-m-rtic]

@@ -114,7 +114,6 @@ const APP: () = {
         resources = [led1]
     )]
     fn set_led1_state(ctx: set_led1_state::Context, enabled: bool) {
-        defmt::debug!("Running set_led1_state: {}", enabled);
         if enabled {
             ctx.resources.led1.set_low().unwrap();
         } else {
@@ -176,7 +175,6 @@ const APP: () = {
     fn on_timer0(ctx: on_timer0::Context) {
         let timer0 = ctx.resources.timer0;
         if timer0.event_compare_cc0().read().bits() != 0x00u32 {
-            defmt::debug!("Timer 0 fired");
             timer0.event_compare_cc0().write(|w| unsafe { w.bits(0) });
             // Try to spawn set_led1_state. If it's queue is full, we do nothing.
             let _ = ctx.spawn.set_led1_state(false);

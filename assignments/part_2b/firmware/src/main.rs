@@ -18,6 +18,8 @@ use hal::{
 };
 use postcard::CobsAccumulator;
 
+use rtt_target::{rprintln, rtt_init_print};
+
 #[rtic::app(
     device=firmware::hal::pac,
     peripherals=true,
@@ -34,6 +36,8 @@ const APP: () = {
     // Initializes and returns all resources that need to be dynamically instantiated
     #[init(spawn = [read_uarte0])]
     fn init(ctx: init::Context) -> init::LateResources {
+        rtt_init_print!(BlockIfFull);
+        rprintln!("Starting");
         // Initialize UARTE0
         // Initialize port0
         let port0 = p0::Parts::new(ctx.device.P0);
@@ -92,7 +96,7 @@ const APP: () = {
     // Do something with a message that just came in
     #[task(capacity = 5, priority = 10, spawn = [send_message])]
     fn handle_message(ctx: handle_message::Context, msg: ServerToDevice) {
-        defmt::println!("Received message: {:?}. What do I need to do now?", msg);
+        rprintln!("Received message: {:?}. What do I need to do now?", msg);
         let ServerToDevice { say_hello, set_led_status, .. } = msg;
 
         if say_hello {
@@ -115,7 +119,7 @@ const APP: () = {
     // This task waits until the last TX transaction is completed
     #[task(capacity = 10, resources = [uarte0], priority  = 1)]
     fn send_message(mut ctx: send_message::Context, msg: DeviceToServer) {
-        defmt::info!("Sending message: {:?}", &msg);
+        rprintln!("Sending message: {:?}", &msg);
         let mut buf = [0; 32];
         // Serialize message
         if let Ok(bytes) = postcard::to_slice_cobs(&msg, &mut buf) {
@@ -128,17 +132,15 @@ const APP: () = {
                 .uarte0
                 .lock(|uarte0| uarte0.try_start_tx(&bytes))
             {
-                defmt::trace!("Waiting for currently running tx task to finish");
                 // Go to sleep to avoid busy waiting
                 cortex_m::asm::wfi();
             }
         } else {
-            defmt::error!(
-                "Could not serialize message {}. Please increase buffer size.",
+            rprintln!(
+                "Could not serialize message {:?}. Please increase buffer size.",
                 msg
             )
         }
-        defmt::debug!("Done sending message");
     }
 
     // React to an interrupt from UARTE0
@@ -150,7 +152,7 @@ const APP: () = {
     )]
     fn on_uarte0(mut ctx: on_uarte0::Context) {
         use firmware::uarte::UarteEvent::*;
-        defmt::trace!("Running task on_uarte0");
+        rprintln!("Running task on_uarte0");
 
         ctx.resources
             .uarte0
@@ -187,8 +189,8 @@ const APP: () = {
         let chunk = ctx.resources.uarte0.get_rx_chunk();
         match ctx.resources.accumulator.feed(chunk) {
             Consumed => {}
-            OverFull(_) => defmt::warn!("Accumulator full, dropping contents"),
-            DeserError(_) => defmt::error!("Deserialize error, throwing away message"),
+            OverFull(_) => rprintln!("Accumulator full, dropping contents"),
+            DeserError(_) => rprintln!("Deserialize error, throwing away message"),
             Success { data, .. } => ctx
                 .spawn
                 .handle_message(data)
@@ -198,7 +200,7 @@ const APP: () = {
 
     // RTIC requires that unused interrupts are declared in an extern block when
     // using software tasks; these interrupts will be used to dispatch the
-    // software tasks. For every software task, one interrupt must be sacraficed.
+    // software tasks. For every software task, one interrupt must be sacrificed.
     // See https://rtic.rs/0.5/book/en/by-example/tasks.html;
     extern "C" {
         // Software interrupt 0 / Event generator unit 0

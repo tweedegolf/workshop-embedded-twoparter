@@ -14,6 +14,8 @@ use hal::{
     Timer,
 };
 
+use rtt_target::rprintln;
+
 use self::rx_buffer::UarteRxBuffer;
 pub enum UarteEvent {
     EndRx, // End of RX transaction
@@ -121,7 +123,7 @@ where
     // if there is already a TX transaction going on.
     // In that case, this method should be called another time.
     pub fn try_start_tx(&mut self, bytes: &[u8]) -> Result<(), ()> {
-        defmt::trace!("Bytes ({}): {:?}", bytes.len(), bytes);
+        rprintln!("Bytes ({}): {:?}", bytes.len(), bytes);
         // Check whether a TX transaction has started.
         if self.uarte.events_txstarted.read().bits() == 0x01 {
             // Check whether the last TX transaction has finished
@@ -186,11 +188,6 @@ where
     /// Get received chunk, that exists in DMA
     pub fn get_rx_chunk(&mut self) -> &'static [u8] {
         let chunk_len = self.uarte.rxd.amount.read().amount().bits() as usize;
-        defmt::trace!(
-            "UARTE0_BUFFER contents: {:?}. chunk_len: {}",
-            self.buffer.as_mut_slice(),
-            chunk_len
-        );
 
         &self.buffer.as_mut_slice()[0..chunk_len]
     }

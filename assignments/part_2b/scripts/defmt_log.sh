@@ -8,5 +8,5 @@ then
 fi
 
 
-echo "Listening to localhost:8765 for defmt logs. Press CTRL+C to quit."
+echo "Listening to localhost:8765 for RTT logs. Press CTRL+C to quit."
 nc localhost 8765 | defmt-print -e target/thumbv7*/debug/$APP_NAME
