@@ -21,12 +21,18 @@ use hal::{
     timer::Periodic,
     Timer,
 };
+use lis3dh::accelerometer::Accelerometer;
 use lis3dh::Configuration;
 use lis3dh::DataRate;
 use lis3dh::Lis3dh;
 use lis3dh::Lis3dhI2C;
 use lis3dh::SlaveAddr;
-use lis3dh::accelerometer::Accelerometer;
+
+use rtt_target as rtt;
+
+use rtt_target::{rprintln, rtt_init_print};
+
+use rtic::cyccnt::U32Ext;
 
 type Lis3dhInstance = Lis3dh<Lis3dhI2C<Twim<TWIM0>>>;
 
@@ -40,13 +46,21 @@ const APP: () = {
         gpiote: Gpiote,
         timer0: Timer<TIMER0, Periodic>,
         led1: Pin<Output<PushPull>>,
+        led2: Pin<Output<PushPull>>,
         // TODO accelerometer: Lis3dhInstance,
     }
 
     // Initialize peripherals, before interrupts are unmasked
     // Returns all resources that need to be dynamically instantiated
-    #[init]
-    fn init(ctx: init::Context) -> init::LateResources {
+    #[init(schedule = [toggle_led_2])]
+    fn init(mut ctx: init::Context) -> init::LateResources {
+        // Enable cycle counter for task scheduling
+        ctx.core.DWT.enable_cycle_counter();
+
+        // Enable RTT
+        rtt_init_print!(BlockIfFull);
+        rprintln!("Starting");
+
         // Split port P0 up into a set of different pins
         // to allow them to be owned by different modules
         let port0 = Parts::new(ctx.device.P0);
@@ -55,6 +69,7 @@ const APP: () = {
         // We degrade the pin, removing the pin number from type information so
         // it can be used in generic modules
         let led1 = port0.p0_13.into_push_pull_output(Level::High).degrade();
+        let led2 = port0.p0_14.into_push_pull_output(Level::High).degrade();
 
         // Initialize pin p0.11 as a pull up input pin
         let btn1 = port0.p0_11.into_pullup_input().degrade();
@@ -88,21 +103,25 @@ const APP: () = {
         // ===== 3. Connect INT pin to GPIOTE channel 1, listening for high-to-low transition =====
         // TODO
 
-        // ===== 4. Initialize lis3dh driver with, add them to the resources =====
+        // ===== 4. Initialize lis3dh driver, add them to the resources =====
         // Just uncomment the line below for this step
         // let accelerometer = acc::config_acc(twim0).unwrap();
         // ===== 5. Update the existing `on_gpiote` task to spawn a new task on channel 1 event,
         //    which fetches accelerometer data and prints it =====
         //    *To read a sample:*
         //      let sample = accelerometer.accel_norm().unwrap();
-        //      defmt::info!("Sample: x: {}, y: {}, z: {}", sample.x, sample.y, sample.z);
+        //      rprintln!("Sample: x: {}, y: {}, z: {}", sample.x, sample.y, sample.z);
 
+        let now = ctx.start;
+        // Schedule toggle_led_2 task
+        ctx.schedule.toggle_led_2(now, true).unwrap();
 
         init::LateResources {
             led1,
+            led2,
             gpiote,
             timer0,
-
+            // TODO: accelerometer
         }
     }
 
@@ -117,11 +136,10 @@ const APP: () = {
 
     #[task(
         capacity = 5,
-        priority = 1, // Very low priority
+        priority = 3, // Very low priority
         resources = [led1]
     )]
     fn set_led1_state(ctx: set_led1_state::Context, enabled: bool) {
-        defmt::debug!("Running set_led1_state: {}", enabled);
         // Leds on the DK are active low
         if enabled {
             ctx.resources.led1.set_low().unwrap(); // Can't actually fail
@@ -130,18 +148,55 @@ const APP: () = {
         }
     }
 
+    /// A task that toggles LED 2,
+    /// and schedules another instance of this task
+    /// to be run in the future
+    #[task(
+        capacity = 5,
+        priority = 50,
+        resources = [led2],
+        schedule = [toggle_led_2]
+    )]
+    fn toggle_led_2(ctx: toggle_led_2::Context, enabled: bool) {
+        let led2 = ctx.resources.led2;
+        if enabled {
+            led2.set_high().unwrap(); // Disable
+        } else {
+            led2.set_low().unwrap(); // Enable
+        }
+
+        // Use ctx.start in HW task and init
+        let task_scheduled_at = ctx.scheduled;
+        // nRF52 runs at 64MHz
+        ctx.schedule
+            .toggle_led_2(task_scheduled_at + 64_000_000.cycles(), !enabled)
+            .ok();
+    }
+
+    /// A very low-priority task that, as it happens,
+    /// is never spawned in this application
+    #[task(capacity = 5, priority = 1, resources = [led2])]
+    fn low_prio_task(ctx: low_prio_task::Context) {
+        // Locking mutates
+        let mut led2 = ctx.resources.led2;
+
+        led2.lock(|led2_lock| {
+            led2_lock.set_low().unwrap();
+        });
+    }
+
     #[task(
         binds = GPIOTE,
-        priority = 99,
-        resources = [gpiote],
+        priority = 20,
+        resources = [gpiote, led2],
         spawn = [set_led1_state]
     )]
     fn on_gpiote(ctx: on_gpiote::Context) {
         let gpiote = ctx.resources.gpiote;
 
-        // Check if an event was triggered on channel 0
+        // Check if an event was triggered on channel 0 (BTN1)
         if gpiote.channel0().is_event_triggered() {
-            defmt::debug!("Button 1 pressed");
+            rprintln!("Button 1 pressed");
             // Clear events
             gpiote.channel0().reset_events();
             // Try to spawn set_led1_state. If it's queue is full, we do nothing.
@@ -159,7 +214,6 @@ const APP: () = {
     fn on_timer0(ctx: on_timer0::Context) {
         let timer0 = ctx.resources.timer0;
         if timer0.event_compare_cc0().read().bits() != 0x00u32 {
-            defmt::debug!("Timer 0 fired");
             timer0.event_compare_cc0().write(|w| unsafe { w.bits(0) });
             // Try to spawn set_led1_state. If it's queue is full, we do nothing.
             let _ = ctx.spawn.set_led1_state(false);

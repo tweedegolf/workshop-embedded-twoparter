@@ -38,12 +38,12 @@ rustup target add thumbv7em-none-eabihf
 For the rest of the steps, you'll need the [source code of this workshop](https://github.com/tweedegolf/workshop-december-2021/).
 
 ```bash
-git clone git@github.com:tweedegolf/workshop-december-2021.git
-cd embedded-workshop
+git clone git@github.com:tweedegolf/workshop-december-2021.git embedded-workshop
+cd 
 ```
 Or, if you like to use HTTPS instead:
 ```bash
-git clone https://github.com/tweedegolf/workshop-december-2021.git
+git clone https://github.com/tweedegolf/workshop-december-2021.git embedded-workshop
 cd embedded-workshop
 ```
 
