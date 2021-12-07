@@ -5,6 +5,25 @@
 
 The goal of this exercise is to get acquainted with RTIC. Use your experience (and code) from last week's workshop.
 
+### LIS3DH accelerometer connection
+First, let's wire up the LIS3DH accelerometer for I2C usage. We'll connect the LIS3DH INT1 pin to the nRF's P0.02.
+**Please turn off your DK**. Then, wire up the accelerometer, referring to the table below.
+
+| LIS3DH Pin | nRF52 pin 	  |
+|------------|----------------|
+| VIN (+)    | VDD            |
+| 3vo        | -              |
+| GND (-)    | GND            |
+| SCL        | P0.27          |
+| SDA        | P0.26          |
+| SDO        | -              |
+| CS'        | -              |
+| INT1       | P0.01          |
+| A1         | -              |
+| A2         | -              |
+| A3         | -              |
+
+
 ### Instructions
 1. The workshop repo has been updated, so start with a `git pull`
 

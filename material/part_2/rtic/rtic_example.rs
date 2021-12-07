@@ -50,8 +50,7 @@ const APP: () = {
     // ANCHOR: init
     #[init]
     fn init(ctx: init::Context) -> init::LateResources {
-        let peripherals = ctx.device;
-        let port0 = Parts::new(peripherals.P0);
+        let port0 = Parts::new(ctx.device.P0);
 
         // Init pins
         let led1 = port0.p0_13.into_push_pull_output(Level::High).degrade();
@@ -176,7 +175,7 @@ const APP: () = {
         let timer0 = ctx.resources.timer0;
         if timer0.event_compare_cc0().read().bits() != 0x00u32 {
             timer0.event_compare_cc0().write(|w| unsafe { w.bits(0) });
-            // Try to spawn set_led1_state. If it's queue is full, we do nothing.
+            // Try to spawn set_led1_state. If its queue is full, we do nothing.
             let _ = ctx.spawn.set_led1_state(false);
         }
     }
