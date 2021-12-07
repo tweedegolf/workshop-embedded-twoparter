@@ -1,4 +1,5 @@
 <div class="read">
+
 # Exercise 2B
 **Device-host communication**
 
