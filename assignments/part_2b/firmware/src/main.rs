@@ -109,8 +109,8 @@ const APP: () = {
         }
 
         if let Some((led_id, enabled)) = set_led_status {
-            let _ = (led_id, enabled); // Remove this line to use the data
-            // TODO react to an incoming message, possibly by spawning a newly defined task
+            // TODO react to an incoming message, possibly by spawning a newly defined task.
+            // This task should set the led status as specified by the command.
             // Don't forget to declare it!
         }
     }
@@ -152,7 +152,6 @@ const APP: () = {
     )]
     fn on_uarte0(mut ctx: on_uarte0::Context) {
         use firmware::uarte::UarteEvent::*;
-        rprintln!("Running task on_uarte0");
 
         ctx.resources
             .uarte0

@@ -5,19 +5,23 @@ use format::ServerToDevice;
 type ChunkIter<'a> = Peekable<Split<'a, char>>;
 use commands::*;
 
+/// Trait that defines a command.
 pub trait Command: Debug {
+    /// Parse a command
     fn parse(chunks: ChunkIter) -> Result<Box<dyn Command>, ParseError>
     where
         Self: Sized;
 
+    /// Build up a ServerToDevice message given the command's state
+    fn build_message(&self) -> ServerToDevice;
+
+    /// Helper method to easily put this command on the heap
     fn boxed(self) -> Box<dyn Command>
     where
         Self: Sized + 'static,
     {
         Box::new(self)
     }
-
-    fn build_message(&self) -> ServerToDevice;
 }
 
 #[derive(Debug)]
@@ -56,6 +60,8 @@ mod commands {
         ParseError::{self, *},
     };
 
+    /// LedStatus command. Used to tell
+    /// the device to set a led state
     #[derive(Debug)]
     pub struct LedStatus {
         led_no: u8,
@@ -102,6 +108,8 @@ mod commands {
         }
     }
 
+    /// SayHello command. Tells the 
+    /// device to be polite and say hi back
     #[derive(Debug)]
     pub struct SayHello;
 

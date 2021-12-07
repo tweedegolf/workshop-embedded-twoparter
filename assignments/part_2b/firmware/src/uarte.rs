@@ -123,7 +123,6 @@ where
     // if there is already a TX transaction going on.
     // In that case, this method should be called another time.
     pub fn try_start_tx(&mut self, bytes: &[u8]) -> Result<(), ()> {
-        rprintln!("Bytes ({}): {:?}", bytes.len(), bytes);
         // Check whether a TX transaction has started.
         if self.uarte.events_txstarted.read().bits() == 0x01 {
             // Check whether the last TX transaction has finished
