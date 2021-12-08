@@ -40,6 +40,6 @@ version = "0.14.0"
 features = ["rt"]
 
 [features]
-default = ["nrf52dk"]
+default = ["nrf52840dk"]
 nrf52dk = ["nrf52832-hal"]
 nrf52840dk = ["nrf52840-hal"]

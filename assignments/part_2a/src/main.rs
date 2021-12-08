@@ -90,7 +90,7 @@ const APP: () = {
 
         // TODO:
         // ===== 1. Initialize i2c SCL,SDA as floating inputs and degrade. ======
-        // Initialize pin connected to the acceleromers INT pin as pull down input.
+        // Initialize all pins connected to the accelerometer as floating inputs
         // let scl = port0...;
         // let sda = port0...;
         // let int = port0...;
@@ -111,6 +111,8 @@ const APP: () = {
         //    *To read a sample:*
         //      let sample = accelerometer.accel_norm().unwrap();
         //      rprintln!("Sample: x: {}, y: {}, z: {}", sample.x, sample.y, sample.z);
+        
+        // ===== 6. Test it! Tap the accelerometer board and see if it raises an interrupt =====
 
         let now = ctx.start;
         // Schedule toggle_led_2 task

@@ -32,7 +32,7 @@ First, let's wire up the LIS3DH accelerometer for I2C usage. We'll connect the L
 1. For this exercise, we'll be working in part 2A. Inside the `src` folder, you'll find a couple of files:
     - `lib.rs` Where all modules are declared. No need to edit
     - `hal_import.rs` HAL compatibility module. You can leave it as is.
-    - `acc.rs` contains a `config_acc` function. This function can be used to configure the LIS3DH to raise an interrupt if it has any data ready. It uses the `lis3dh` driver crate in order to do so. All you need to do is pass it a TWIM instance.
+    - `acc.rs` contains a `config_acc` function. This function can be used to configure the LIS3DH to raise an interrupt if it experiences acceleration above 1.1g. It uses the `lis3dh` driver crate in order to do so. All you need to do is pass it a TWIM instance.
     - `main.rs` Here's where your magic happens. This is a typical RTIC application. It contains several examples of topics we just covered in the talk. You'll find the instructions at the bottom of the `init` task.
 
 1. Follow the instructions in `main.rs`.

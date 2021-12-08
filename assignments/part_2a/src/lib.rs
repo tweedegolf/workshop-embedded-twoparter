@@ -1,6 +1,5 @@
 #![no_std]
 
-use core::sync::atomic::{AtomicUsize, Ordering};
 use panic_probe as _;
 
 pub mod acc;
