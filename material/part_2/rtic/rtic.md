@@ -35,7 +35,7 @@ See [RTIC.rs](https://rtic.rs) for more info and examples
 ```
 
 ## Resource locking
-Bad
+Error
 ```rust
 {{#rustdoc_include ./rtic_example.rs:lock_bad}}
 ```

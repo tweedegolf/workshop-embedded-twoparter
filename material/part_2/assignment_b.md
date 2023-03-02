@@ -6,21 +6,20 @@
 The goal of this exercise is to get an idea of how code can be shared between a device and a host, in order to set up a robust communication system.
 
 ### Instructions
-1. For this exercice, we'll be working in part 2B. There are a couple of packages in there:
+1. For this exercice, we'll be working in part 2B. There are a couple of projects in there:
     - `firmware` contains all code that is run on the device. Apart from what you saw in the last exercise, it contains a `uarte` module, which uses the PAC to enable advanced functionality not implemented by the HAL. Take a peek at the functions in there. Try not to get distracted by the implementation details, but focus on the overall functionality that is available. The main application already implements tasks to control the `TimeoutUarte`.
     - `cli` defines a simple CLI application that listens for incoming messages, and opens a rudimentary repl with which you can send commands. You'll be implementing a couple of commands yourself, so have a peek at `cmd.rs`, to get an idea of how to do that.
     - `format` contains definitions of whatever is being send from the device to the server and vice-versa. To send new commands, you'll need to update the `ServerToDevice` and `DeviceToServer` structs. If you do, don't forget to compile both the firmware and the CLI in order for getting them to communicate nicely.
 
 1. Flash the firmware onto the device using this command:
 ```bash
-cargo run -p firmware --release
+cd ./firmware
+cargo run --release
 ```
 5. Run the CLI app with one of these commands. For `<PORT>` substitute the device's serial port path. If you omit the argument, the app will print any serial ports detected.
 ```bash
-# Linux
-cargo run-linux -p cli -- <PORT>
-# Windows
-cargo run-windows -p cli -- <PORT>
+cd ./cli
+cargo run -- -p <PORT>
 ```
 
 6. Test the setup. In the CLI repl, type
