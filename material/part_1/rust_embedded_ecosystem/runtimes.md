@@ -96,8 +96,8 @@ async fn main(spawner: Spawner, p: Peripherals) {
 Here we have four tasks. They wait for their pin to go low, then print a message, then wait for the pin to go high and print a message again in a loop.
 Every task has its own state (no heap required) and you never have to deal with interrupts.
 
-We've done a couple of [blogposts](https://tweedegolf.nl/blog/63/async-on-embedded-present-and-future) on this as well that are worth checking out.
+We've done a couple of [blogposts](https://tweedegolf.nl/en/blog/65/async-rust-vs-rtos-showdown) on this as well that are worth checking out.
 
-While perfectly usable today, Rust still lacks some features which makes it so that `embedded-hal` can't support async yet. But work is being done to make this possible and once it is, `embedded-hal` will be updated to support it.
+While perfectly usable today, Rust still lacks some features which makes it so that `embedded-hal` can't support async on the stable compiler yet. But work is being done to make this possible and once it is, `embedded-hal` will be updated to support it. For now there is the [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) that is only usable on nightly.
 
 </div>

@@ -43,3 +43,7 @@ features = ["rt"]
 default = ["nrf52840dk"]
 nrf52dk = ["nrf52832-hal"]
 nrf52840dk = ["nrf52840-hal"]
+
+[profile.release]
+debug = true
+lto = true

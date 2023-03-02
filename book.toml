@@ -3,7 +3,7 @@ authors = ["Henk Oordt", "Dion Dokter"]
 language = "en"
 multilingual = false
 src = "material"
-title = "Workshop embedded Rust December 2021"
+title = "Workshop embedded Rust"
 
 [output.html]
 additional-css = ["material/assets/style/main.css"]

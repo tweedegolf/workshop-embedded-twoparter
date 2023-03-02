@@ -35,15 +35,15 @@ rustup target add thumbv7em-none-eabihf
 
 ### Repository
 
-For the rest of the steps, you'll need the [source code of this workshop](https://github.com/tweedegolf/workshop-december-2021/).
+For the rest of the steps, you'll need the [source code of this workshop](https://github.com/tweedegolf/workshop-embedded-twoparter).
 
 ```bash
-git clone git@github.com:tweedegolf/workshop-december-2021.git embedded-workshop
+git clone git@github.com:tweedegolf/workshop-embedded-twoparter.git embedded-workshop
 cd 
 ```
 Or, if you like to use HTTPS instead:
 ```bash
-git clone https://github.com/tweedegolf/workshop-december-2021.git embedded-workshop
+git clone https://github.com/tweedegolf/workshop-embedded-twoparter.git embedded-workshop
 cd embedded-workshop
 ```
 
@@ -59,12 +59,10 @@ sudo apt install -y libusb-1.0-0-dev libftdi1-dev libudev-dev
 
 On `all platforms`:
 ```bash
-cargo install flip-link --version 0.1.5
-cargo install cargo-binutils --version 0.3.3
-cargo install cargo-flash --version 0.11.0
-cargo install cargo-embed --version 0.11.0
-cargo install probe-run --version 0.3.0
 rustup component add llvm-tools-preview rustfmt clippy
+cargo install cargo-binutils --version 0.3.6
+cargo install cargo-flash --version 0.16.0
+cargo install probe-run --version 0.3.6
 ```
 
 If you're on `linux`, you'll need to update your udev rules.
@@ -82,7 +80,9 @@ Then, switch the DK off and on or remove the cable and plug it in again.
 
 ### Debugging
 
-For debugging, we will be using GDB and OpenOCD.
+Debugging has been set up for assignment 2b, we will be using GDB and OpenOCD.
+This is optional, you don't have to use it. Logging to console is likely enough.
+Skip this setup if you want.
 
 #### Linux
 On Ubuntu, GDB can be installed with:
@@ -185,6 +185,7 @@ runner = "probe-run --chip nRF52832"
 
 To test the hardware, please connect the nRF52-DK to your pc, switch it on, and run
 ```bash
+cd ./assignments/test
 cargo run --release -p workshop-examples --features=nrf52dk --bin test
 ```
 
@@ -192,6 +193,7 @@ If everything works correctly, you should now see the accelerometer samples bein
 #### Specific for nRF52840-DK
 To test the hardware, please connect the nrf52840-DK to your pc, switch it on, and run
 ```bash
+cd ./assignments/test
 cargo run --release -p workshop-examples --features=nrf52840dk --bin test
 ```
 
