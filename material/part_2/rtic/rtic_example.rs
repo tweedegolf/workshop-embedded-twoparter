@@ -34,26 +34,39 @@ type Lis3dhInstance = Lis3dh<Lis3dhI2C<Twim<TWIM0>>>;
 #[rtic::app(
     device=firmware::hal::pac,
     peripherals=true,
-    monotonic=rtic::cyccnt::CYCCNT
+    dispatchers = [SWI0_EGU0, SWI1_EGU1, SWI2_EGU2],
 )]
-const APP: () = {
+mod app {
     // ANCHOR_END: app_attr
 
     //ANCHOR: resources
-    struct Resources {
+    #[local]
+    struct LocalResources {
         gpiote: Gpiote,
         timer0: Timer<TIMER0, Periodic>,
         led1: Pin<Output<PushPull>>,
     }
+
+    #[shared]
+    struct SharedResources {
+        led2: Pin<Output<PushPull>>,
+    }
     //ANCHOR_END: resources
 
     // ANCHOR: init
+    #[monotonic(binds = SysTick, default = true)]
+    type MyMono = Systick<1000>; // 1000 Hz / 1 ms granularity
+
     #[init]
-    fn init(ctx: init::Context) -> init::LateResources {
+    fn init(ctx: init::Context) -> (SharedResources, LocalResources, innit::Monotonics) {
         let port0 = Parts::new(ctx.device.P0);
+
+        // Enable systick counter for task scheduling
+        let mono = Systick::new(ctx.core.SYST, 64_000_000);
 
         // Init pins
         let led1 = port0.p0_13.into_push_pull_output(Level::High).degrade();
+        let led2 = port0.p0_14.into_push_pull_output(Level::High).degrade();
         let btn1 = port0.p0_11.into_pullup_input().degrade();
 
         // Configure GPIOTE
@@ -70,31 +83,17 @@ const APP: () = {
         timer0.start(1_000_000u32); // 1000 ticks = 1 ms
 
         // Return the resources
-        init::LateResources {
-            led1,
-            gpiote,
-            timer0,
-        }
+        (
+            SharedResources { led2 },
+            LocalResources {
+                led1,
+                gpiote,
+                timer0,
+            },
+            innit::Monotonics(mono),
+        )
     }
     // ANCHOR_END: init
-
-    // ANCHOR: schedule_init
-    #[init]
-    fn init(ctx: init::Context) -> init::LateResources {
-        // Enable cycle counter
-        ctx.core.DWT.enable_cycle_counter();
-
-        // Init peripherals...
-
-        let now = ctx.start;
-        // Schedule toggle_led_2 task
-        ctx.schedule.toggle_led_2(now, true).unwrap();
-
-        init::LateResources {
-            // The resources
-        }
-    }
-    // ANCHOR_END: schedule_init
 
     // ANCHOR: idle
     #[idle]
@@ -110,106 +109,51 @@ const APP: () = {
     #[task(
         capacity = 5,
         priority = 1, // Very low priority
-        resources = [led1]
+        local = [led1]
     )]
     fn set_led1_state(ctx: set_led1_state::Context, enabled: bool) {
         if enabled {
-            ctx.resources.led1.set_low().unwrap();
+            ctx.local.led1.set_low().unwrap();
         } else {
-            ctx.resources.led1.set_high().unwrap();
+            ctx.local.led1.set_high().unwrap();
         }
     }
     // ANCHOR_END: sw_task
 
-    // ANCHOR: schedule_task
-    #[task(
-        capacity = 5,
-        priority = 2,
-        resources = [led2],
-        schedule = [toggle_led_2]
-    )]
-    fn toggle_led_2(ctx: toggle_led_2::Context, enabled: bool) {
-        let led2 = ctx.resources.led2;
-        if enabled {
-            led2.set_high().unwrap(); // Disable
-        } else {
-            led2.set_low().unwrap(); // Enable
-        }
-
-        // Use ctx.start in HW task and init
-        let task_scheduled_at = ctx.scheduled;
-        ctx.schedule
-            .toggle_led_2(task_scheduled_at + 10_000_000u32.cycles(), !enabled)
-            .ok();
-    }
-    // ANCHOR_END: schedule_task
-
-    #[task(
-        binds = GPIOTE,
-        priority = 99,
-        resources = [gpiote],
-        spawn = [set_led1_state]
-    )]
-    fn on_gpiote(ctx: on_gpiote::Context) {
-        let gpiote = ctx.resources.gpiote;
-
-        // Check if an event was triggered on channel 0
-        if gpiote.channel0().is_event_triggered() {
-            defmt::debug!("Button 1 pressed");
-            // Clear events
-            gpiote.channel0().reset_events();
-            // Try to spawn set_led1_state. If it's queue is full, we do nothing.
-            ctx.spawn.set_led1_state(true).ok();
-        }
-        // TODO check if LIS3DH caused the interrupt. If so, spawn read task
-    }
-
     // ANCHOR: hw_task
     #[task(
         binds = TIMER0,
-        priority = 99, // Very high priority
-        resources = [timer0],
-        spawn = [set_led1_state]
+        priority = 7, // Very high priority
+        local = [timer0],
     )]
     fn on_timer0(ctx: on_timer0::Context) {
         let timer0 = ctx.resources.timer0;
         if timer0.event_compare_cc0().read().bits() != 0x00u32 {
             timer0.event_compare_cc0().write(|w| unsafe { w.bits(0) });
             // Try to spawn set_led1_state. If its queue is full, we do nothing.
-            let _ = ctx.spawn.set_led1_state(false);
+            let _ = set_led1_state::spawn(false);
         }
     }
     // ANCHOR_END: hw_task
 
     // ANCHOR: lock_bad
-    #[task(capacity = 5, priority = 1, resources = [led2])]
+    #[task(capacity = 5, priority = 1, shared = [led2])]
     fn low_prio_task(ctx: low_prio_task::Context) {
-        let led2 = ctx.resources.led2;
+        let led2 = ctx.shared.led2;
 
         led2.set_high();
     }
     // ANCHOR_END: lock_bad
 
     // ANCHOR: lock_ok
-    #[task(capacity = 5, priority = 1, resources = [led2])]
+    #[task(capacity = 5, priority = 1, shared = [led2])]
     fn low_prio_task(ctx: low_prio_task::Context) {
         // Locking mutates
-        let mut led2 = ctx.resources.led2;
+        let mut led2 = ctx.shared.led2;
 
         led2.lock(|led2_lock| {
             led2_lock.set_low().unwrap();
         });
     }
     // ANCHOR_END: lock_ok
-
-    // ANCHOR: interrupts
-    extern "C" {
-        // Software interrupt 0 / Event generator unit 0
-        fn SWI0_EGU0();
-        // Software interrupt 1 / Event generator unit 1
-        fn SWI1_EGU1();
-        // Software interrupt 2 / Event generator unit 2
-        fn SWI2_EGU2();
-    }
-    // ANCHOR_END: interrupts
-};
+}

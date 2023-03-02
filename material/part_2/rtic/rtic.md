@@ -33,20 +33,6 @@ See [RTIC.rs](https://rtic.rs) for more info and examples
 ```rust
 {{#rustdoc_include ./rtic_example.rs:sw_task}}
 ```
-## Interrupt declaration
-```rust
-{{#rustdoc_include ./rtic_example.rs:interrupts}}
-```
-
-## Task scheduling
-Init
-```rust
-{{#rustdoc_include ./rtic_example.rs:schedule_init}}
-```
-Task
-```rust
-{{#rustdoc_include ./rtic_example.rs:schedule_task}}
-```
 
 ## Resource locking
 Bad
