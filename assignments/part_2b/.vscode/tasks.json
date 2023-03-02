@@ -4,18 +4,62 @@
         {
             "label": "cargo-build:firmware",
             "type": "shell",
-            "command": "/bin/bash",
+            "command": "cargo",
             "args": [
-                "-c",
-                "cargo build -p firmware && scripts/rtt_block.sh firmware",
+                "build", "--release"
             ],
             "problemMatcher": [
                 "$rustc"
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+            },
+            "options": {
+                "cwd": "./firmware"
             }
-        }
+        },
+        {
+            "label": "cargo-build:cli",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": {
+                "kind": "build",
+            },
+            "options": {
+                "cwd": "./cli"
+            }
+        },
+        {
+            "label": "cargo-build:format",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": {
+                "kind": "build",
+            },
+            "options": {
+                "cwd": "./format"
+            }
+        },
+        {
+            "label": "cargo-build:all",
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            },
+            "dependsOn": ["cargo-build:format", "cargo-build:firmware", "cargo-build:cli"],
+            "dependsOrder": "sequence",
+        },
     ],
 }

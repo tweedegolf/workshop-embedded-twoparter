@@ -1,5 +1,5 @@
 book
-target
+*target
 
 !.vscode
 */**/.vscode/.cortex-debug*.state.json

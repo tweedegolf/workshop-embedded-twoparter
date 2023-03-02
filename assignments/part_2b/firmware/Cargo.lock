@@ -188,6 +188,7 @@ dependencies = [
  "cortex-m-rt",
  "cortex-m-rtic",
  "embedded-hal",
+ "format",
  "heapless",
  "lis3dh",
  "nb 1.0.0",
@@ -210,6 +211,15 @@ dependencies = [
  "bytemuck",
  "half",
  "typenum",
+]
+
+[[package]]
+name = "format"
+version = "0.1.0"
+dependencies = [
+ "heapless",
+ "postcard",
+ "serde",
 ]
 
 [[package]]
@@ -288,7 +298,8 @@ dependencies = [
 [[package]]
 name = "lis3dh"
 version = "0.4.2"
-source = "git+https://github.com/BenBergman/lis3dh-rs.git?rev=2d08c07#2d08c0717afc5456b13a7bd1ca39a0d8ab183707"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f41b6bb1f0a9cf25c0f184469382e73112fa0071b206ef5b3c6b235c7353a84"
 dependencies = [
  "accelerometer",
  "embedded-hal",

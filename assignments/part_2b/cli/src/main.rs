@@ -1,17 +1,18 @@
-use std::thread;
-
-use clap::{App, Arg};
+use crate::{cmd::CommandParser, serial::TxPort};
+use clap::Parser;
 use format::DeviceToServer;
 use serialport::{SerialPortType, UsbPortInfo};
-
-use crate::{cmd::CommandParser, serial::TxPort};
+use std::thread;
 
 mod cmd;
 mod serial;
 
 fn handle_message(msg: DeviceToServer) {
     println!("Got message: {:?}", msg);
-    let DeviceToServer { led_status, said_hello } = msg;
+    let DeviceToServer {
+        led_status,
+        said_hello,
+    } = msg;
     if said_hello {
         println!("Device said hello!");
     }
@@ -54,19 +55,19 @@ fn repl<const N: usize>(mut tx_port: TxPort<N>) {
     }
 }
 
-fn main() {
-    let matches = App::new("Device commander")
-        .version("0.1")
-        .arg(
-            Arg::with_name("PORT")
-                .index(1)
-                .takes_value(true)
-                .help("The path to the serial port to listen to"),
-        )
-        .get_matches();
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Name of the person to greet
+    #[arg(short, long, help = "The path to the serial port to listen to")]
+    port: Option<String>,
+}
 
-    if let Some(port_name) = matches.value_of("PORT") {
-        run(port_name)
+fn main() {
+    let args = Args::parse();
+
+    if let Some(port_name) = args.port {
+        run(&port_name)
     } else {
         eprintln!("Please specify port as the first argument. For help, run with --help");
         eprintln!();
@@ -82,8 +83,7 @@ fn run(port_name: &str) {
             let (tx_port, mut rx_port): (TxPort<32>, _) = port.split();
 
             // Start a new thread on which we listen for data from the serial port
-            let rx_thread =
-                thread::spawn(move || rx_port.run_read_task::<_, 32>(handle_message));
+            let rx_thread = thread::spawn(move || rx_port.run_read_task::<_, 32>(handle_message));
 
             repl(tx_port);
 
@@ -96,7 +96,6 @@ fn run(port_name: &str) {
         }
     }
 }
-
 
 /// Lists available ports in stdout
 fn print_available_ports() {

@@ -2,7 +2,7 @@
 use std::{io, time::Duration};
 
 use format::{DeviceToServer, ServerToDevice};
-use postcard::CobsAccumulator;
+use postcard::accumulator::{CobsAccumulator, FeedResult};
 
 // Wrapper around a serialport. Can be split up
 // into a TxPort and an RxPort for use in separate tasks.
@@ -42,7 +42,7 @@ impl RxPort {
     pub fn run_read_task<F: Fn(DeviceToServer) -> (), const N: usize>(&mut self, on_msg: F) {
         let mut accumulator = CobsAccumulator::<32>::new();
         let mut serial_buf = [0u8; N];
-        use postcard::FeedResult::*;
+        
         loop {
             let chunk_len = self
                 .port
@@ -60,10 +60,10 @@ impl RxPort {
 
             let chunk = &serial_buf[..chunk_len];
             match accumulator.feed(chunk) {
-                Consumed => {} // Do nothing
-                OverFull(_) => eprintln!("Accumulator full, dropping contents"),
-                DeserError(_) => eprintln!("Deserialize error, throwing away message"),
-                Success { data, .. } => on_msg(data), // Handle message
+                FeedResult::Consumed => {} // Do nothing
+                FeedResult::OverFull(_) => eprintln!("Accumulator full, dropping contents"),
+                FeedResult::DeserError(_) => eprintln!("Deserialize error, throwing away message"),
+                FeedResult::Success { data, .. } => on_msg(data), // Handle message
             }
         }
     }

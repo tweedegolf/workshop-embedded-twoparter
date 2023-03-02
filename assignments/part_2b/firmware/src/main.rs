@@ -16,28 +16,43 @@ use hal::{
     ppi::{self, Ppi0},
     Timer,
 };
-use postcard::CobsAccumulator;
+use postcard::accumulator::{CobsAccumulator, FeedResult};
+use systick_monotonic::*;
 
 use rtt_target::{rprintln, rtt_init_print};
 
 #[rtic::app(
     device=firmware::hal::pac,
     peripherals=true,
-    monotonic=rtic::cyccnt::CYCCNT
+    dispatchers = [SWI0_EGU0, SWI1_EGU1, SWI2_EGU2],
 )]
-const APP: () = {
-    // The resources that are to be shared between tasks
-    struct Resources {
+mod app {
+    use super::*;
+
+    #[monotonic(binds = SysTick, default = true)]
+    type MyMono = Systick<1000>; // 1000 Hz / 1 ms granularity
+
+    #[local]
+    struct LocalResources {
         accumulator: CobsAccumulator<32>,
+    }
+
+    // The resources that are to be shared between tasks
+    #[shared]
+    struct SharedResources {
         uarte0: TimeoutUarte<UARTE0, TIMER0, Ppi0>,
     }
 
     // Initialize peripherals, before interrupts are unmasked
     // Initializes and returns all resources that need to be dynamically instantiated
-    #[init(spawn = [read_uarte0])]
-    fn init(ctx: init::Context) -> init::LateResources {
+    #[init]
+    fn init(ctx: init::Context) -> (SharedResources, LocalResources, init::Monotonics) {
         rtt_init_print!(BlockIfFull);
         rprintln!("Starting");
+
+        // Enable systick counter for task scheduling
+        let mono = Systick::new(ctx.core.SYST, 64_000_000);
+
         // Initialize UARTE0
         // Initialize port0
         let port0 = p0::Parts::new(ctx.device.P0);
@@ -78,10 +93,11 @@ const APP: () = {
         // An accumulator for postcard-COBS messages
         let accumulator = CobsAccumulator::new();
 
-        init::LateResources {
-            uarte0,
-            accumulator,
-        }
+        (
+            SharedResources { uarte0 },
+            LocalResources { accumulator },
+            init::Monotonics(mono),
+        )
     }
 
     // Defines what happens when there's nothing left to do
@@ -94,14 +110,17 @@ const APP: () = {
     }
 
     // Do something with a message that just came in
-    #[task(capacity = 5, priority = 10, spawn = [send_message])]
-    fn handle_message(ctx: handle_message::Context, msg: ServerToDevice) {
+    #[task(capacity = 5, priority = 5)]
+    fn handle_message(_ctx: handle_message::Context, msg: ServerToDevice) {
         rprintln!("Received message: {:?}. What do I need to do now?", msg);
-        let ServerToDevice { say_hello, set_led_status, .. } = msg;
+        let ServerToDevice {
+            say_hello,
+            set_led_status,
+            ..
+        } = msg;
 
         if say_hello {
-            ctx.spawn
-            .send_message(DeviceToServer {
+            send_message::spawn(DeviceToServer {
                 said_hello: true,
                 ..DeviceToServer::default()
             })
@@ -111,13 +130,12 @@ const APP: () = {
         if let Some((led_id, enabled)) = set_led_status {
             // TODO react to an incoming message, possibly by spawning a newly defined task.
             // This task should set the led status as specified by the command.
-            // Don't forget to declare it!
         }
     }
 
     // Send a message over UARTE0
     // This task waits until the last TX transaction is completed
-    #[task(capacity = 10, resources = [uarte0], priority  = 1)]
+    #[task(capacity = 10, shared = [uarte0], priority = 1)]
     fn send_message(mut ctx: send_message::Context, msg: DeviceToServer) {
         rprintln!("Sending message: {:?}", &msg);
         let mut buf = [0; 32];
@@ -127,11 +145,7 @@ const APP: () = {
             // as this task might be pre-empted by another task that uses uarte0.
             // uarte0.try_start_tx returns an Err variant if there is already a
             // TX transaction going on.
-            while let Err(_) = ctx
-                .resources
-                .uarte0
-                .lock(|uarte0| uarte0.try_start_tx(&bytes))
-            {
+            while let Err(_) = ctx.shared.uarte0.lock(|uarte0| uarte0.try_start_tx(&bytes)) {
                 // Go to sleep to avoid busy waiting
                 cortex_m::asm::wfi();
             }
@@ -146,21 +160,20 @@ const APP: () = {
     // React to an interrupt from UARTE0
     #[task(
         binds = UARTE0_UART0,
-        priority = 100,
-        resources = [uarte0],
-        spawn = [read_uarte0],
+        priority = 6,
+        shared = [uarte0],
     )]
     fn on_uarte0(mut ctx: on_uarte0::Context) {
         use firmware::uarte::UarteEvent::*;
 
-        ctx.resources
+        ctx.shared
             .uarte0
             // We need to lock here, as this task might be pre-empted by
             // higher-priority tasks that use uarte0.
             .lock(|uarte0| match uarte0.get_clear_event() {
                 Some(EndRx) => {
                     // Read transaction ended, spawn read task
-                    ctx.spawn.read_uarte0().ok();
+                    read_uarte0::spawn().ok();
                 }
                 Some(EndTx) => {
                     // This event causes the running
@@ -175,38 +188,18 @@ const APP: () = {
     // deserializes the data, and spawns the `handle_message`
     // task.
     #[task(
-        priority = 101,
-        resources = [uarte0, accumulator],
-        spawn = [handle_message],
+        priority = 7,
+        shared = [uarte0],
+        local = [accumulator],
     )]
-    fn read_uarte0(ctx: read_uarte0::Context) {
-        use postcard::FeedResult::*;
-
-        // No need to lock here, as from all tasks that use
-        // uarte0 or the accumulator, this task has the highest priority
-        // and will therefore not be pre-empted.
-        let chunk = ctx.resources.uarte0.get_rx_chunk();
-        match ctx.resources.accumulator.feed(chunk) {
-            Consumed => {}
-            OverFull(_) => rprintln!("Accumulator full, dropping contents"),
-            DeserError(_) => rprintln!("Deserialize error, throwing away message"),
-            Success { data, .. } => ctx
-                .spawn
-                .handle_message(data)
+    fn read_uarte0(mut ctx: read_uarte0::Context) {
+        let chunk = ctx.shared.uarte0.lock(|uarte0| uarte0.get_rx_chunk());
+        match ctx.local.accumulator.feed(chunk) {
+            FeedResult::Consumed => {}
+            FeedResult::OverFull(_) => rprintln!("Accumulator full, dropping contents"),
+            FeedResult::DeserError(_) => rprintln!("Deserialize error, throwing away message"),
+            FeedResult::Success { data, .. } => handle_message::spawn(data)
                 .expect("Could not start handle_message task, please increase its capacity."),
         }
     }
-
-    // RTIC requires that unused interrupts are declared in an extern block when
-    // using software tasks; these interrupts will be used to dispatch the
-    // software tasks. For every software task, one interrupt must be sacrificed.
-    // See https://rtic.rs/0.5/book/en/by-example/tasks.html;
-    extern "C" {
-        // Software interrupt 0 / Event generator unit 0
-        fn SWI0_EGU0();
-        // Software interrupt 1 / Event generator unit 1
-        fn SWI1_EGU1();
-        // Software interrupt 2 / Event generator unit 2
-        fn SWI2_EGU2();
-    }
-};
+}

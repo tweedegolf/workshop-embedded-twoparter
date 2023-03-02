@@ -1,6 +1,4 @@
-# Before upgrading check that everything is available on all tier1 targets here:
-# https://rust-lang.github.io/rustup-components-history
 [toolchain]
-channel = "1.56.1"
+channel = "1.67.1"
 components = [ "rust-src", "rustfmt", "llvm-tools-preview", "rustfmt", "clippy" ]
-targets = [ "thumbv7em-none-eabihf", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-gnu"]
+targets = [ "thumbv7em-none-eabihf"]

@@ -6,42 +6,27 @@
             "type": "cortex-debug",
             "request": "launch",
             "name": "Flash and Debug nRF52840",
-            "servertype": "external",
-            "gdbTarget": "127.0.0.1:3333",
-            "gdbPath": "gdb-multiarch",
+            "servertype": "jlink",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "cargo-build:firmware",
             "runToMain": true,
-            "executable": "./target/thumbv7em-none-eabihf/debug/firmware",
+            "executable": "./firmware/target/thumbv7em-none-eabihf/debug/firmware",
             "device": "nRF52840",
             "svdFile": "${workspaceRoot}/nrf52840.svd",
             "postLaunchCommands": [
                 "break rust_begin_unwind", // Break at panic
-                "monitor rtt server start 8765 0",
-                "source .vscode/rtt.gdb",
-                "monitor rtt start",
             ],
-        },
-        {
-            /* Configuration for the nRF52-DK board */
-            "type": "cortex-debug",
-            "request": "launch",
-            "name": "Flash and Debug nRF52832",
-            "servertype": "external",
-            "gdbTarget": "127.0.0.1:3333",
-            "gdbPath": "gdb-multiarch",
-            "cwd": "${workspaceRoot}",
-            "preLaunchTask": "cargo-build:test",
-            "runToMain": true,
-            "executable": "./target/thumbv7em-none-eabihf/debug/firmware",
-            "device": "nRF52832",
-            "svdFile": "${workspaceRoot}/nrf52832.svd",
-            "postLaunchCommands": [
-                "break rust_begin_unwind", // Break at panic
-                "monitor rtt server start 8765 0",
-                "source .vscode/rtt.gdb",
-                "monitor rtt start",
-            ],
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                    {
+                        "label": "",
+                        "port": 0,
+                        "type": "console"
+                    }
+                ]
+            }
         },
     ],
 }
