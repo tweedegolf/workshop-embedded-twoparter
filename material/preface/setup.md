@@ -91,7 +91,11 @@ sudo apt update
 sudo apt install gdb-multiarch
 ```
 
-In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**. You can download it using xPack package manager or `xpm`. To install `xpm`, please follow the instructions [on this page](https://xpack.github.io/xpm/install/#). Once xpm is working correctly, you can install OpenOCD with:
+In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**. 
+
+On some distros you can run `apt install openocd` to get the 0.11 version.
+
+If not, you can download it using xPack package manager or `xpm`. To install `xpm`, please follow the instructions [on this page](https://xpack.github.io/xpm/install/#). Once xpm is working correctly, you can install OpenOCD with:
 
 ```bash
 xpm install --global @xpack-dev-tools/openocd@latest --verbose
