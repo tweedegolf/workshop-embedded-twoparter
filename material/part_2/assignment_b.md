@@ -38,7 +38,7 @@ led 1 on
 
 ### Resources
 - [The RTIC book](https://rtic.rs)
-- [Lis3dh driver documentation](https://docs.rs/lis3dh/latest/lis3dh/) *Note that we are using an unreleased version here, so the docs on docs.rs are not complete*
+- [Lis3dh driver documentation](https://docs.rs/lis3dh/latest/lis3dh/)
 - [Lis3dh driver repository](https://github.com/BenBergman/lis3dh-rs)
 - [nRF-HAL examples](https://github.com/nrf-rs/nrf-hal/tree/master/examples)
 
