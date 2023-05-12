@@ -60,9 +60,9 @@ sudo apt install -y libusb-1.0-0-dev libftdi1-dev libudev-dev
 On `all platforms`:
 ```bash
 rustup component add llvm-tools-preview rustfmt clippy
-cargo install cargo-binutils --version 0.3.6
-cargo install cargo-flash --version 0.16.0
-cargo install probe-run --version 0.3.6
+cargo install cargo-binutils
+cargo install cargo-flash
+cargo install probe-run
 ```
 
 If you're on `linux`, you'll need to update your udev rules.
@@ -78,59 +78,11 @@ If you're on `windows`, we need to install a generic WinUSB driver. You can use 
 
 Then, switch the DK off and on or remove the cable and plug it in again.
 
-### Debugging
-
-Debugging has been set up for assignment 2b, we will be using GDB and OpenOCD.
-This is optional, you don't have to use it. Logging to console is likely enough.
-Skip this setup if you want.
-
-#### Linux
-On Ubuntu, GDB can be installed with:
-```bash
-sudo apt update
-sudo apt install gdb-multiarch
-```
-
-In order to get logging working correctly, we'll use OpenOCD **version 0.11.x**. 
-
-On some distros you can run `apt install openocd` to get the 0.11 version.
-
-If not, you can download it using xPack package manager or `xpm`. To install `xpm`, please follow the instructions [on this page](https://xpack.github.io/xpm/install/#). Once xpm is working correctly, you can install OpenOCD with:
-
-```bash
-xpm install --global @xpack-dev-tools/openocd@latest --verbose
-```
-That command will output the location OpenOCD is installed in.
-For more details, take a look at the [install page](https://xpack.github.io/openocd/install/).
-
-Alternatively, you can get OpenOCD from [GitHub Releases](https://github.com/xpack-dev-tools/openocd-xpack/releases).
-
-*You need to update your PATH variable to make everything a bit more ergonomic. You may need to restart applications for this change to take effect. Alternatively, you can use a symbolic link.*
-
-To check that you've got the correct version working:
-```bash
-openocd --version
-```
-
-The output should be something like this:
-```bash
-xPack OpenOCD x86_64 Open On-Chip Debugger 0.11.0+dev (2021-10-16-21:15)
-Licensed under GNU GPL v2
-For bug reports, read
-	http://openocd.org/doc/doxygen/bugs.html
-```
-
-#### Windows
-
-On `Windows`, make sure openocd and arm-none-eabi-gdb can be found on the path.
-- [Arm embedded toolchain download](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-- [OpenOCD download](https://github.com/xpack-dev-tools/openocd-xpack/releases)
-- Wherever you installed these, make sure to add them to the path. *Note: You may have to restart applications for this change to take effect* ([How to](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/))
-
-
 ### Other tools
+
 Of course, you're free to use your editor of choice. To improve the Rust development experience, we use Rust Analyzer, which can be found [here](https://github.com/rust-analyzer/rust-analyzer). It's available for many different editors. As for ourselves, we will be using Visual Studio Code along with a couple of extensions. To install them, please use the instructions for [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=matklad.rust-analyzer) and [Cortex Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug).
 
+Debugging is also possible using the normal GDB tools.
 
 ## Testing
 Before we begin, we need to test our hardware. We'll be testing the LIS3DH accelerometer, as well as the nRF52840-DK or nRF52-DK board. Make sure you have checked out the latest version of the workshop source.
@@ -166,11 +118,9 @@ If you're using the nRF52-DK, you need to update the configuration a bit. Edit t
 ```toml
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # Uncomment the line below to use probe-rs for nRF52840
-runner = "probe-run --chip nRF52840"
+runner = "probe-run --chip nRF52840 --erase-all"
 # Uncomment the line below to use probe-rs for nRF52832
-#runner = "probe-run --chip nRF52832"
-# Uncomment the line below to use GDB with OpenOCD
-# runner = "gdb-multiarch -q -x openocd.gdb"
+#runner = "probe-run --chip nRF52832 --erase-all"
 <rest of file...>
 ```
 
@@ -179,11 +129,9 @@ to
 ```toml
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # Uncomment the line below to use probe-rs for nRF52840
-#runner = "probe-run --chip nRF52840"
+#runner = "probe-run --chip nRF52840 --erase-all"
 # Uncomment the line below to use probe-rs for nRF52832
-runner = "probe-run --chip nRF52832"
-# Uncomment the line below to use GDB with OpenOCD
-# runner = "gdb-multiarch -q -x openocd.gdb"
+runner = "probe-run --chip nRF52832 --erase-all"
 <rest of file...>
 ```
 

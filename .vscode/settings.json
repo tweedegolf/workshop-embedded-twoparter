@@ -1,0 +1,10 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "assignments/part_1/Cargo.toml",
+        "assignments/part_2a/Cargo.toml",
+        "assignments/part_2b/cli/Cargo.toml",
+        "assignments/part_2b/firmware/Cargo.toml",
+        "assignments/part_2b/format/Cargo.toml",
+        "assignments/part_3/Cargo.toml",
+    ],
+}
