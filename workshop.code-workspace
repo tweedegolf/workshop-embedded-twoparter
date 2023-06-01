@@ -33,6 +33,8 @@
 		"recommendations": [
 			"matklad.rust-analyzer",
 			"marus25.cortex-debug",
+			"serayuzgur.crates",
+			"tamasfe.even-better-toml"
 		],
 		// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 		"unwantedRecommendations": [
